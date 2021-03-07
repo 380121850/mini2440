@@ -118,6 +118,16 @@
  */
 #include <config_cmd_default.h>
 
+
+
+#undef CONFIG_CMD_FPGA		/* FPGA configuration Support	*/
+#undef CONFIG_CMD_IMI		/* iminfo			*/
+#undef CONFIG_CMD_ITEST	/* Integer (and string) test	*/
+#undef CONFIG_CMD_SETGETDCR	/* DCR support on 4xx		*/
+#undef CONFIG_CMD_SOURCE	/* "source" command support	*/
+#undef CONFIG_CMD_XIMG		/* Load part of Multi Image	*/
+
+
 #define CONFIG_CMD_ASKENV
 #define CONFIG_CMD_CACHE
 #define CONFIG_CMD_DATE
