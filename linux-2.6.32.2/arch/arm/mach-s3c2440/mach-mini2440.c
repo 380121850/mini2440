@@ -416,7 +416,7 @@ static struct mtd_partition friendly_arm_default_nand_part[] = {
 		.size	= 1024 * 1024 * 1024, //
 	},
 	[4] = {
-		.name	= "nand",
+		.name	= "nand0",
 		.offset = 0x00000000,
 		.size	= 1024 * 1024 * 1024, //
 	}
@@ -424,7 +424,7 @@ static struct mtd_partition friendly_arm_default_nand_part[] = {
 
 static struct s3c2410_nand_set friendly_arm_nand_sets[] = {
 	[0] = {
-		.name		= "NAND",
+		.name		= "nandflash0",
 		.nr_chips	= 1,
 		.nr_partitions	= ARRAY_SIZE(friendly_arm_default_nand_part),
 		.partitions	= friendly_arm_default_nand_part,

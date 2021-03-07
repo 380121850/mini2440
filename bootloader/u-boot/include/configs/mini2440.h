@@ -148,7 +148,7 @@
 /* USB Support*/
 
 #define CONFIG_BOOTDELAY	1
-#define CONFIG_BOOTARGS		"noinitrd root=/dev/ram0 console=ttySAC0 init=/linuxrc"
+#define CONFIG_BOOTARGS		"noinitrd root=/dev/ram0 console=ttySAC0 init=/linuxrc"" "MTDPARTS_DEFAULT
 #define CONFIG_ETHADDR	        08:08:11:18:12:27
 #define CONFIG_NETMASK          255.255.255.0
 #define CONFIG_IPADDR		192.168.50.230
@@ -270,7 +270,7 @@
 //#else 
 #define CONFIG_ENV_IS_IN_NAND 1
 //#define CONFIG_ENV_IS_IN_FLASH 1
-#define CONFIG_ENV_OFFSET 0X40000
+#define CONFIG_ENV_OFFSET 0X80000
 #define CONFIG_ENV_SIZE			0x20000	/* Total Size of Environment Sector */
 //#endif
 
