@@ -10,6 +10,7 @@
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/compat.h>
 #include <ubi_uboot.h>
+#include <config.h>
 
 struct mtd_info *mtd_table[MAX_MTD_DEVICES];
 

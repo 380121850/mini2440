@@ -439,7 +439,7 @@ void main_loop (void)
 	// added by FriendlyARM
 	{
 		void FriendlyARMMenu(void);
-		FriendlyARMMenu();
+		//FriendlyARMMenu();
 	}
 
 	/*

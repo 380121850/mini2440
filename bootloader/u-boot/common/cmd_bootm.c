@@ -618,6 +618,7 @@ int do_bootm (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	}
 
 	// Added by FriendlyARM
+	#if 0
 	{ 
 		memset(&images, 0, sizeof images);
 		unsigned addr;
@@ -630,6 +631,7 @@ int do_bootm (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		images.ep = addr;
 		do_bootm_linux(0, 0, 0, &images);
 	}
+	#endif
 
 	if (bootm_start(cmdtp, flag, argc, argv))
 		return 1;

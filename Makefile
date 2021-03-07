@@ -57,13 +57,14 @@ KERNEL_VER:=linux-2.6.32.2
 UIMAGE:=zImage
 KERNEL_CFG:=config_mini2440_x35
 
+PUB_IMAGE:=$(CHIP)_$(BOOT_MEDIA)_image_$(LIB_TYPE)
 
-export PUB_IMAGE:=$(CHIP)_$(BOOT_MEDIA)_image_$(LIB_TYPE)
+ROOT_FS_TAR:=rootfs_basic.tar.gz
+PUB_ROOTFS:=rootfs_basic
 
 EXT4_TOOL:=make_ext4fs
 EXT4_IMAGE_BIN:=rootfs_$(CHIP)_96M.ext4
 export PUB_BOARD:=board_$(LIB_TYPE)
-export PUB_ROOTFS:=rootfs_$(LIB_TYPE)
 
 JFFS2_IMAGE_BIN_64K:=rootfs_$(CHIP)_64k.jffs2
 JFFS2_IMAGE_BIN_128K:=rootfs_$(CHIP)_128k.jffs2
@@ -141,6 +142,7 @@ hinotools_prepare:
 u-boot: prepare 
 	@echo "---------task [1]	build boot"
 	make -C $(OSDRV_DIR)/$(UBOOT_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- $(UBOOT_CONFIG)
+	#find $(OSDRV_DIR)/$(UBOOT_VER) | xargs touch
 	pushd $(OSDRV_DIR)/$(UBOOT_VER);make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- -j 16 >/dev/null;popd
 	cp $(OSDRV_DIR)/$(UBOOT_VER)/u-boot.bin $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(UBOOT)
 
@@ -156,8 +158,8 @@ kernel: prepare
 	cp $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG) $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/configs/$(KERNEL_CFG)_defconfig
 	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- $(KERNEL_CFG)_defconfig
 	pushd $(OSDRV_DIR)/$(KERNEL_VER);\
-	make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- zImage -j 16 >/dev/null;popd
-	cp $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/boot/zImage $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(UIMAGE)
+	make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- uImage -j 16 >/dev/null;popd
+	cp $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/boot/uImage $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(UIMAGE)
 
 kernel_clean:
 	rm $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(UIMAGE) -rf
@@ -167,13 +169,9 @@ kernel_clean:
 ##########################################################################################
 #task [3]	prepare rootfs
 ##########################################################################################
-hirootfs_prepare: prepare
+rootfs_prepare: prepare
 	@echo "---------task [3] prepare rootfs "
-	rm $(OSDRV_DIR)/pub/$(PUB_ROOTFS)* -rf
-	tar xzf $(OSDRV_DIR)/rootfs_scripts/rootfs.tgz -C $(OSDRV_DIR)/pub
-	mv $(OSDRV_DIR)/pub/rootfs $(OSDRV_DIR)/pub/$(PUB_ROOTFS)
-	tar xzf $(RUNTIMELIB_DIR)/$(TOOLCHAIN_RUNTIME_LIB)/$(TOOLCHAIN_RUNTIME_LIB_C) -C $(OSDRV_DIR)/pub/$(PUB_ROOTFS)
-	pushd $(OSDRV_DIR)/pub/$(PUB_ROOTFS);$(CROSS_COMPILE)strip -d ./lib/*;popd
+	tar xzf $(OSDRV_DIR)/rootfs/$(ROOT_FS_TAR) -C $(OSDRV_DIR)/pub
 
 ##########################################################################################
 #task [4]	build busybox
@@ -257,7 +255,7 @@ hiboardtools_clean:
 ##########################################################################################
 #task [7]	build rootfs
 ##########################################################################################
-hirootfs_build: hirootfs_prepare hibusybox hiboardtools  hipctools hirootfs_notools_build
+hirootfs_build: rootfs_prepare busybox hirootfs_notools_build
 hirootfs_notools_build:
 	@echo "---------task [7] build rootfs"
 	chmod 777 $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)/*
@@ -302,7 +300,7 @@ endif
 	pushd $(OSDRV_DIR)/pub;tar czf $(PUB_ROOTFS).tgz $(PUB_ROOTFS);rm $(PUB_ROOTFS) -rf;popd
 	@echo "---------finish osdrv work"
 
-hirootfs_clean:
+rootfs_clean:
 ifeq ($(OSDRV_DIR)/pub/$(PUB_ROOTFS), $(wildcard $(OSDRV_DIR)/pub/$(PUB_ROOTFS)))
 	pushd $(OSDRV_DIR)/pub/$(PUB_ROOTFS); chmod +w usr/bin -R; chmod +w usr/sbin -R; chmod +w sbin -R; popd
 endif

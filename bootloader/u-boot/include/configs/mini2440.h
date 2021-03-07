@@ -49,7 +49,7 @@
 //#define CONFIG_SBC2410X	1	/* on a friendly-arm SBC-2410X Board  */
 #define	CONFIG_S3C2440		1	/* in a SAMSUNG S3C2440 SoC     */
 #define CONFIG_MINI2440		1	/* on a friendly-arm MINI2440 Board  */
-#define CONFIG_MINI2440_LED 	1
+//#define CONFIG_MINI2440_LED 	1
 #define CONFIG_S3C2410_NAND_SKIP_BAD	1
 /* input clock of PLL */
 #define CONFIG_SYS_CLK_FREQ	12000000/* the SBC2410X has 12MHz input clock */
@@ -80,12 +80,13 @@
 #define CONFIG_NET_MULTI		1
 #define CONFIG_NET_RETRY_COUNT		20
 #define CONFIG_DRIVER_DM9000		1
-#define CONFIG_DM9000_BASE		0x20000300
+#define CONFIG_DRIVER_DM9000_NO_EEPROM	1
+#define CONFIG_DM9000_BASE 		0x20000300
 #define DM9000_IO 			CONFIG_DM9000_BASE
 #define DM9000_DATA 			(CONFIG_DM9000_BASE+4)
 #define CONFIG_DM9000_USE_16BIT		1
 #define CONFIG_DM9000_NO_SROM		1
-#undef CONFIG_DM9000_DEBUG
+//#undef CONFIG_DM9000_DEBUG
 /*
  * select serial console configuration
  */
@@ -122,8 +123,8 @@
 #define CONFIG_CMD_DATE
 #define CONFIG_CMD_DHCP
 #define CONFIG_CMD_ELF
-//#define CONFIG_MTD_DEVICE
-//#define CONFIG_CMD_MTDPARTS
+#define CONFIG_MTD_DEVICE
+#define CONFIG_CMD_MTDPARTS
 #define CONFIG_CMD_PING
 #define CONFIG_CMD_NAND
 #define CONFIG_CMD_REGINFO
@@ -137,20 +138,23 @@
 /* USB Support*/
 
 #define CONFIG_BOOTDELAY	1
-#define CONFIG_BOOTARGS		"noinitrd root=/dev/mtdblock3 console=ttySAC0 init=/linuxrc"
+#define CONFIG_BOOTARGS		"noinitrd root=/dev/ram0 console=ttySAC0 init=/linuxrc"
 #define CONFIG_ETHADDR	        08:08:11:18:12:27
 #define CONFIG_NETMASK          255.255.255.0
-#define CONFIG_IPADDR		192.168.0.230
-#define CONFIG_SERVERIP		192.168.0.1
-#define CONFIG_GATEWAYIP	192.168.0.1
+#define CONFIG_IPADDR		192.168.50.230
+#define CONFIG_SERVERIP		192.168.50.118
+#define CONFIG_GATEWAYIP	192.168.50.1
 #define CONFIG_OVERWRITE_ETHADDR_ONCE
 
+
+
 /*#define CONFIG_BOOTFILE	"elinos-lart" */
-#define CONFIG_BOOTCOMMAND	"nand read.i 0x30008000 60000 500000;bootm"
+#define CONFIG_BOOTCOMMAND	"nboot os;bootm"
 #define	CONFIG_EXTRA_ENV_SETTINGS					\
 	"stdin=serial\0"					\
 	"stdout=serial\0"					\
 	"stderr=serial\0"					\
+	"mtdparts="MTDPARTS_DEFAULT \
 	""
 
 #if defined(CONFIG_CMD_KGDB)
@@ -300,6 +304,7 @@
 //#else
 #define CONFIG_AUTO_COMPLETE
 //#endif
+#undef CONFIG_CMD_ONENAND	/* OneNAND support		*/
 
 
 #if 1
@@ -321,15 +326,12 @@
 
 #define CONFIG_JFFS2_CMDLINE 1
 #define MTDIDS_DEFAULT "nand0=nandflash0"
-#define MTDPARTS_DEFAULT "mtdparts=nandflash0:384k(bootloader)," \
-					      "128k(params)," \
-					      "5m(kernel)," \
-					      "-(root)"
-
+#define MTDPARTS_DEFAULT "mtdparts=nandflash0:512k(uboot)ro,128k(env),7m(os),-(app)"
+//#define CONFIG_MTDPARTS MTDPARTS_DEFAULT
 
 #define ENABLE_CMD_LOADB_X	1
-#define ENABLE_CMD_NAND_YAFFS	1
-#define ENABLE_CMD_NAND_YAFFS_SKIPFB	1
+//#define ENABLE_CMD_NAND_YAFFS	1
+//#define ENABLE_CMD_NAND_YAFFS_SKIPFB	1
 //#define CFG_NAND_YAFFS1_NEW_OOB_LAYOUT	1
 
 #if 0

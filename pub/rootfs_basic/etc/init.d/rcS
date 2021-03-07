@@ -1,0 +1,42 @@
+#! /bin/sh
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:
+runlevel=S
+prevlevel=N
+umask 022
+export PATH runlevel prevlevel
+
+#
+#	Trap CTRL-C &c only in this shell so we can interrupt subprocesses.
+#
+trap ":" INT QUIT TSTP
+/bin/hostname FriendlyARM
+
+/bin/mount -n -t proc none /proc
+/bin/mount -n -t sysfs none /sys
+/bin/mount -t ramfs none /dev
+
+/sbin/mdev -s
+# mounting file system specified in /etc/fstab
+mkdir -p /dev/pts
+mkdir -p /dev/shm
+/bin/mount -n -t devpts none /dev/pts -o mode=0622
+/bin/mount -n -t tmpfs tmpfs /dev/shm
+/bin/mount -n -t ramfs none /tmp
+/bin/mount -n -t ramfs none /var
+mkdir -p /var/empty
+mkdir -p /var/log
+mkdir -p /var/lock
+mkdir -p /var/run
+mkdir -p /var/tmp
+
+/sbin/ifconfig lo 127.0.0.1
+/etc/init.d/ifconfig-eth0
+
+telnetd                              
+mount -t jffs2 /dev/mtdblock3 /usr/app/
+cd /usr/app/                           
+chmod +x SystemInit.sh;                
+./SystemInit.sh
+
+
