@@ -159,7 +159,7 @@
 
 
 /*#define CONFIG_BOOTFILE	"elinos-lart" */
-#define CONFIG_BOOTCOMMAND	"nboot os;bootm"
+#define CONFIG_BOOTCOMMAND	"nboot 0x32000000 os;bootm 0x32000000"
 #define	CONFIG_EXTRA_ENV_SETTINGS					\
 	"stdin=serial\0"					\
 	"stdout=serial\0"					\

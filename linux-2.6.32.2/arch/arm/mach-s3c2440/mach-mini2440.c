@@ -396,30 +396,25 @@ static struct platform_device s3c24xx_uda134x = {
 
 static struct mtd_partition friendly_arm_default_nand_part[] = {
 	[0] = {
-		.name	= "supervivi",
-		.size	= 0x00040000,
+		.name	= "uboot",
+		.size	= 0x00080000,
 		.offset	= 0,
 	},
 	[1] = {
-		.name	= "param",
-		.offset = 0x00040000,
+		.name	= "env",
+		.offset = 0x00080000,
 		.size	= 0x00020000,
 	},
 	[2] = {
-		.name	= "Kernel",
-		.offset = 0x00060000,
-		.size	= 0x00500000,
+		.name	= "os",
+		.offset = 0x000a0000,
+		.size	= 0x00700000,
 	},
 	[3] = {
-		.name	= "root",
-		.offset = 0x00560000,
-		.size	= 1024 * 1024 * 1024, //
+		.name	= "app",
+		.offset = 0x007a0000,
+		.size	= MTDPART_SIZ_FULL, //
 	},
-	[4] = {
-		.name	= "nand0",
-		.offset = 0x00000000,
-		.size	= 1024 * 1024 * 1024, //
-	}
 };
 
 static struct s3c2410_nand_set friendly_arm_nand_sets[] = {

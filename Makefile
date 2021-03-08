@@ -54,7 +54,7 @@ export UBOOT_CONFIG:=mini2440_config
 
 
 KERNEL_VER:=linux-2.6.32.2
-UIMAGE:=zImage
+UIMAGE:=uImage
 KERNEL_CFG:=config_mini2440_x35
 
 PUB_IMAGE:=$(CHIP)_$(BOOT_MEDIA)_image_$(LIB_TYPE)
