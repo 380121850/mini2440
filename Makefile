@@ -153,7 +153,7 @@ u-boot_clean:
 ##########################################################################################
 #task [2]	build kernel
 ##########################################################################################
-kernel: prepare 
+kernel: prepare rootfs_prepare
 	@echo "---------task [2] build kernel"
 	cp $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG) $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/configs/$(KERNEL_CFG)_defconfig
 	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- $(KERNEL_CFG)_defconfig
@@ -169,7 +169,7 @@ kernel_clean:
 ##########################################################################################
 #task [3]	prepare rootfs
 ##########################################################################################
-rootfs_prepare: prepare
+rootfs_prepare: prepare busybox
 	@echo "---------task [3] prepare rootfs "
 	tar xzf $(OSDRV_DIR)/rootfs/$(ROOT_FS_TAR) -C $(OSDRV_DIR)/pub
 
