@@ -42,7 +42,8 @@ CROSS_SPECIFIED:=y
 endif
 
 BUSYBOX_CFG:=fa.config
-BUSYBOX_VER:=busybox-1.13.3
+#BUSYBOX_VER:=busybox-1.13.3
+BUSYBOX_VER:=busybox-1.32.1
 TOOLCHAIN_RUNTIME_LIB_C:=lib.tgz
 
 TOOLCHAIN_RUNTIME_LIB:=a7_softfp_neon-vfpv4
@@ -107,17 +108,11 @@ RUNTIMELIB_DIR=$(shell dirname $(TOOLCHAIN_DIR))/$(OSDRV_CROSS)/$(RUNTIME_LIB)
 #	set task
 ##########################################################################################
 ifeq ($(CROSS_SPECIFIED),y)
-ifeq ($(MP_TYPE),amp)
-all: prepare hiboot hikernel hiliteos hirootfs_prepare hiliteos_sample hibusybox \
-	hipctools hiboardtools hiipcm hirootfs_build
-clean: hiboot_clean hikernel_clean \
-       hibusybox_clean hipctools_clean hiboardtools_clean hirootfs_clean hiipcm_clean hiliteos_dirclean
-else
+
 all: prepare hiboot hikernel hirootfs_prepare hibusybox \
 	hipctools hiboardtools hirootfs_build
-clean: hiboot_clean hikernel_clean \
-       hibusybox_clean hipctools_clean hiboardtools_clean hirootfs_clean
-endif
+clean: u-boot_clean kernel_clean busybox_clean rootfs_clean
+
 notools: hiboot hikernel hinotools_prepare hirootfs_notools_build
 distclean:clean pub_clean
 endif
@@ -301,9 +296,6 @@ endif
 	@echo "---------finish osdrv work"
 
 rootfs_clean:
-ifeq ($(OSDRV_DIR)/pub/$(PUB_ROOTFS), $(wildcard $(OSDRV_DIR)/pub/$(PUB_ROOTFS)))
-	pushd $(OSDRV_DIR)/pub/$(PUB_ROOTFS); chmod +w usr/bin -R; chmod +w usr/sbin -R; chmod +w sbin -R; popd
-endif
 	rm $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/ -rf
 
 ##########################################################################################
