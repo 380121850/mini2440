@@ -7,3 +7,6 @@ FriendlyARM-2440整个资料光盘算是比较完整了。但是对于习惯整�
 编译服务器环境 Linux ubuntu18 4.15.0-136-generic （友善是基于Fedora，但是本来另外一个需要使用Ubuntu18，就一并放一起了）
 开发板是256M NAND FLASH，X35显示的配置
 
+2021.03.09
+基于UBOOT引导，内核和rootfs使用initram方式；使用uImage，根文件系统rootfs精简
+
