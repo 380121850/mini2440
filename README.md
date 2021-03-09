@@ -9,4 +9,5 @@ FriendlyARM-2440整个资料光盘算是比较完整了。但是对于习惯整�
 
 2021.03.09
 基于UBOOT引导，内核和rootfs使用initram方式；使用uImage，根文件系统rootfs精简
+busybox升级到最新版本。
 
