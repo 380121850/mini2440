@@ -1,0 +1,744 @@
+diff --git a/Makefile b/Makefile
+index a301287..d316d85 100644
+--- a/Makefile
++++ b/Makefile
+@@ -50,18 +50,28 @@ UNYAFFS2OBJS	= $(UNYAFFS2SRCS:.c=.o)
+ UNSPARE2SRCS	= unspare2.c
+ UNSPARE2OBJS	= $(UNSPARE2SRCS:.c=.o)
+ 
+-TARGET		= mkyaffs2 unyaffs2 unspare2
++TARGET		= mkyaffs2 mkyaffs2image100 mkyaffs2image610 unyaffs2 unspare2
+ 
+ INSTALLDIR	= /bin
+ 
++%.o: %.c
++	$(CC) -c $(CFLAGS) $< -o $@
+ 
+ all: $(TARGET)
+ 
+ install:
+ 	cp $(TARGET) $(INSTALLDIR)
+ 
+-mkyaffs2: $(YAFFS2OBJS) $(LIBOBJS) $(MKYAFFS2OBJS)
+-	$(CC) -o $@ $(YAFFS2OBJS) $(LIBOBJS) $(MKYAFFS2OBJS) $(LDFLAGS)
++mkyaffs2image100: $(YAFFS2OBJS) $(LIBOBJS) $(MKYAFFS2OBJS) oob_config_v100.o
++	$(CC) -o $@ $(YAFFS2OBJS) $(LIBOBJS) $(MKYAFFS2OBJS) $(LDFLAGS) oob_config_v100.o -static
++
++#for Nand Controller V610
++#mkyaffs2image610: $(YAFFS2OBJS) $(LIBOBJS) $(MKYAFFS2OBJS) oob_config_v610.o
++#	$(CC) -o $@ $(YAFFS2OBJS) $(LIBOBJS) $(MKYAFFS2OBJS) $(LDFLAGS) oob_config_v610.o -static
++
++#for Nand Controller V100
++#mkyaffs2: $(YAFFS2OBJS) $(LIBOBJS) $(MKYAFFS2OBJS) oob_config_v100_nand.o
++#	$(CC) -o $@ $(YAFFS2OBJS) $(LIBOBJS) $(MKYAFFS2OBJS) $(LDFLAGS) oob_config_v100_nand.o -static
+ 
+ unyaffs2: $(YAFFS2OBJS) $(LIBOBJS) $(UNYAFFS2OBJS)
+ 	$(CC) -o $@ $(YAFFS2OBJS) $(LIBOBJS) $(UNYAFFS2OBJS) $(LDFLAGS)
+diff --git a/mkyaffs2.c b/mkyaffs2.c
+index b45d06a..daece33 100644
+--- a/mkyaffs2.c
++++ b/mkyaffs2.c
+@@ -47,6 +47,18 @@
+ 
+ #include "version.h"
+ 
++#include "oob_config.h"
++#include <time.h>
++
++#define MAX_BUFFER_LEN 8192
++
++#define MAX_OBJECTS 20000
++
++unsigned int ecctype = 0;
++unsigned int pagetype = 0;
++static int tag_obj_id = 0;
++static struct oob_info *sel_oob_info = NULL;
++
+ /*----------------------------------------------------------------------------*/
+ 
+ #define MKYAFFS2_OBJTABLE_SIZE	4096
+@@ -842,6 +854,80 @@ mkyaffs2_load_spare (const char *oobfile)
+ 	return retval;
+ }
+ 
++/*****************************************************************************/
++/* this follow must be consistent with fastboot !!! */
++struct yaffs2_tags
++{
++#define YAFFS2_SIGN_MAGIC    "YFSS!V10"
++	unsigned char magic[8];
++	unsigned int nandip;
++	unsigned char yaffs2ver[4];
++	unsigned int pagesize;
++	unsigned int ecctype;
++};
++
++/*****************************************************************************/
++static int write_tag_file(unsigned int nandip, int page_type, int ecc_type)
++{
++	char buffer[MAX_BUFFER_LEN] = {0};
++	unsigned short *len;
++	char *ptr;
++	mkyaffs2_obj_t *obj;
++	struct yaffs_obj_hdr oh;
++	struct yaffs2_tags *yaffs2_tags = (struct yaffs2_tags *)buffer;
++	struct stat status =
++	{
++		.st_mode = 0x81FF,
++	};
++
++	tag_obj_id = mkyaffs2_image_objs++;
++
++	memcpy(yaffs2_tags->magic, YAFFS2_SIGN_MAGIC, 8);
++	yaffs2_tags->nandip = nandip;
++	yaffs2_tags->yaffs2ver[0] = 2;
++	yaffs2_tags->yaffs2ver[1] = 6;
++	yaffs2_tags->yaffs2ver[2] = 35;
++	yaffs2_tags->yaffs2ver[3] = 7;
++	yaffs2_tags->pagesize = get_pagesize(page_type);
++	yaffs2_tags->ecctype  = ecc_type;
++
++	ptr = buffer + sizeof(struct yaffs2_tags);
++	/* tag string length. */
++	len = (unsigned short *)ptr;
++	ptr += sizeof(unsigned short);
++
++	time_t now;
++	time(&now);
++	/* tag string comment */
++	*len = sprintf(ptr, "\nyaffs2 file system: %s %s \n"
++			"mkyaffs2image version: %s %s, build time: %s.",
++			get_pagesize_str(pagetype),
++			get_ecctype_str(ecctype),
++			YAFFS2UTILS_VERSION, nand_controller_version, ctime(&now));
++
++	ptr += (*len + 1);
++
++	status.st_size = (int)(ptr - buffer);
++
++	memcpy(mkyaffs2_databuf, buffer, status.st_size);
++
++	mkyaffs2_writechunk(status.st_size, tag_obj_id, 1024);
++
++	obj = mkyaffs2_obj_alloc();
++	if (obj == NULL) {
++		MKYAFFS2_ERROR(" malloc mkyaffs obj fialed! func:%s, line:%d\n",
++				__func__, __LINE__);
++		return -1;
++	}
++	memcpy(obj->name, ".flash", 7);
++	obj->obj_id = tag_obj_id;
++
++	oh.file_size_low = status.st_size & 0xffffffff;
++	oh.file_size_high = (status.st_size >> 32);
++
++	//return mkyaffs2_write_oh(obj, &status, YAFFS_OBJECT_TYPE_FILE, NULL);
++	return mkyaffs2_write_oh(&oh, obj);
++}
+ 
+ /*----------------------------------------------------------------------------*/
+ 
+@@ -851,6 +937,7 @@ mkyaffs2_create_image (const char *dirpath, const char *imgfile)
+ 	int retval;
+ 	struct stat statbuf;
+ 	struct mkyaffs2_obj *root;
++	unsigned int nandip = 0;
+ 
+ 	if (stat(dirpath, &statbuf) < 0 && !S_ISDIR(statbuf.st_mode)) {
+ 		MKYAFFS2_ERROR("ROOT is not a directory '%s'.\n", dirpath);
+@@ -899,6 +986,11 @@ mkyaffs2_create_image (const char *dirpath, const char *imgfile)
+ 	MKYAFFS2_PRINT("\b\b\b[done]\nscanning complete, total %u objects.\n\n",
+ 			mkyaffs2_objtree.objs);
+ 
++	/***** add tag for hisi *****/
++	nandip = sel_oob_info->nandip;
++	write_tag_file(nandip, pagetype, ecctype);
++	/****************************/
++
+ 	/* stage 2: making a image */
+ 	MKYAFFS2_PRINT("stage 2: creating image '%s'\n", imgfile);
+ 
+@@ -924,25 +1016,47 @@ static int
+ mkyaffs2_helper (void)
+ {
+ 	MKYAFFS2_HELP("mkyaffs2 %s - A utility to make the yaffs2 image\n\n", YAFFS2UTILS_VERSION);
+-	MKYAFFS2_HELP("Usage: mkyaffs2 [-h|--help] [-e|--endian] [-v|--verbose]\n"
+-		      "                [-p|--pagesize pagesize] [-s|sparesize sparesize]\n"
+-		      "                [-o|--oobimg oobimage] [--all-root] [--yaffs-ecclayout]\n"
+-		      "                dirname imgfile\n\n");
++	MKYAFFS2_HELP("Usage: mkyaffs2 {dir} {image} {pagesize} {ecctype}\n"
++		      "                [-h|--help] [-e|--endian] [-v|--verbose]\n"
++		      "                [-o|--oobimg oobimage] [--all-root] [--yaffs-ecclayout]\n\n");
+ 	MKYAFFS2_HELP("Options:\n");
++	MKYAFFS2_HELP("dir	the directory tree to be converted\n");
++	MKYAFFS2_HELP("image	the output file to hold the image\n");
++	MKYAFFS2_HELP("pagesize	the page size to be converted\n");
++	MKYAFFS2_HELP("		0 | 512     512 Bytes pagesize\n");
++	MKYAFFS2_HELP("		1 | 2k      2K Bytes pagesize\n");
++	MKYAFFS2_HELP("		2 | 4K      4K Bytes pagesize\n");
++	MKYAFFS2_HELP("		3 | 8K      8K Bytes pagesize\n");
++	MKYAFFS2_HELP("		4 | 16K     16K Bytes pagesize\n");
++	MKYAFFS2_HELP("ecctype	ECC type\n");
++	MKYAFFS2_HELP("		0 | none    no ecc\n");
++	MKYAFFS2_HELP("		1 | 1bit    used 1bit/512 ecc\n");
++	MKYAFFS2_HELP("		2 | 4bit    used 4bit/512 ecc\n");
++	MKYAFFS2_HELP("		3 | 8bit    used 8bit/512 ecc\n");
++	MKYAFFS2_HELP("		4 | 24bit   used 24bit/1k ecc\n");
++	MKYAFFS2_HELP("		5 | 40bit   used 40bit/1k ecc\n");
++	MKYAFFS2_HELP("		6 | 64bit   used 64bit/1k ecc\n");
+ 	MKYAFFS2_HELP("  -h                 display this help message and exit.\n");
+ 	MKYAFFS2_HELP("  -e                 convert endian differed from local machine.\n");
+ 	MKYAFFS2_HELP("  -v                 verbose details instead of progress bar.\n");
+-	MKYAFFS2_HELP("  -p pagesize        page size of target device.\n"
+-		      "                     (512|2048(default)|4096|(8192|16384) bytes)\n");
+-	MKYAFFS2_HELP("  -s sparesize       spare size of target device.\n"
+-		      "                     (default: pagesize/32 bytes; max: pagesize)\n");
+ 	MKYAFFS2_HELP("  -o oobimage        load external oob image file.\n");
+ 	MKYAFFS2_HELP("  --all-root         all files in the target system are owned by root.\n");
+ 	MKYAFFS2_HELP("  --yaffs-ecclayout  use yaffs oob scheme instead of the Linux MTD default.\n");
++	MKYAFFS2_HELP("Example:\n");
++	MKYAFFS2_HELP(" mkyaffs2image100 ./rootfs rootfs_4k4bit.yaffs 4k 4bit\n");
++	MKYAFFS2_HELP(" mkyaffs2image610 ./rootfs rootfs_4k4bit.yaffs 4k 4bit\n");
++	MKYAFFS2_HELP("\n");
+ 
+ 	return -1;
+ }
+ 
++/*************************************************************************/
++struct param_table_t
++{
++	char *str;
++	int   type;
++};
++
+ /*----------------------------------------------------------------------------*/
+ 
+ int 
+@@ -969,12 +1083,6 @@ main (int argc, char *argv[])
+ 	while ((option = getopt_long(argc, argv, short_options,
+ 				     long_options, &option_index)) != EOF) {
+ 		switch (option) {
+-		case 'p':
+-			mkyaffs2_chunksize = strtoul(optarg, NULL, 10);
+-			break;
+-		case 's':
+-			mkyaffs2_sparesize = strtoul(optarg, NULL, 10);
+-			break;
+ 		case 'o':
+ 			oobfile = optarg;
+ 			break;
+@@ -996,6 +1104,99 @@ main (int argc, char *argv[])
+ 		}
+ 	}
+ 
++	{
++#define _S(_s)   (char *)(_s)
++
++		struct param_table_t page_type_param[] =
++		{
++			{_S("0"),    pt_pagesize_512},
++			{_S("512"),  pt_pagesize_512},
++
++			{_S("1"),    pt_pagesize_2K},
++			{_S("2048"), pt_pagesize_2K},
++			{_S("2K"),   pt_pagesize_2K},
++
++			{_S("2"),    pt_pagesize_4K},
++			{_S("4096"), pt_pagesize_4K},
++			{_S("4K"),   pt_pagesize_4K},
++
++			{_S("3"),    pt_pagesize_8K},
++			{_S("8192"), pt_pagesize_8K},
++			{_S("8K"),   pt_pagesize_8K},
++
++			{_S("4"),    pt_pagesize_16K},
++			{_S("16384"), pt_pagesize_16K},
++			{_S("16K"),   pt_pagesize_16K},
++
++			{0, 0},
++		};
++
++		struct param_table_t ecc_type_param[] =
++		{
++			{_S("0"),        et_ecc_none},
++			{_S("none"),     et_ecc_none},
++
++			{_S("1"),        et_ecc_1bit},
++			{_S("1bit"),     et_ecc_1bit},
++			{_S("1bits"),    et_ecc_1bit},
++
++			{_S("2"),        et_ecc_4bytes},
++			{_S("4bit"),     et_ecc_4bit},
++			{_S("4bits"),    et_ecc_4bit},
++			{_S("4byte"),    et_ecc_4bytes},
++			{_S("4bytes"),   et_ecc_4bytes},
++
++			{_S("3"),        et_ecc_8bytes},
++			{_S("8bit"),     et_ecc_8bytes},
++			{_S("8bits"),    et_ecc_8bytes},
++			{_S("8byte"),    et_ecc_8bytes},
++			{_S("8bytes"),   et_ecc_8bytes},
++
++			{_S("4"),        et_ecc_24bit1k},
++			{_S("24bit"),    et_ecc_24bit1k},
++			{_S("24bits"),   et_ecc_24bit1k},
++			{_S("24bits1k"), et_ecc_24bit1k},
++			{_S("24bit1k"),  et_ecc_24bit1k},
++			{_S("24bit1k"),  et_ecc_24bit1k},
++
++			{_S("5"),        et_ecc_40bit1k},
++			{_S("40bit"),    et_ecc_40bit1k},
++			{_S("40bits"),   et_ecc_40bit1k},
++			{_S("40bits1k"), et_ecc_40bit1k},
++			{_S("40bit1k"),  et_ecc_40bit1k},
++
++			{_S("6"),        et_ecc_64bit1k},
++			{_S("64bit"),    et_ecc_64bit1k},
++			{_S("64bits"),   et_ecc_64bit1k},
++			{_S("64bits1k"), et_ecc_64bit1k},
++			{_S("64bit1k"),  et_ecc_64bit1k},
++
++			{0,0},
++		};
++#undef _S
++		struct param_table_t *ptp = page_type_param;
++		struct param_table_t *etp = ecc_type_param;
++
++		pagetype = pt_pagesize_last;
++		for (; ptp->str; ptp++)
++		{
++			if (!strcasecmp(ptp->str, argv[3]))
++			{
++				pagetype = ptp->type;
++				break;
++			}
++		}
++		ecctype = et_ecc_last;
++		for (; etp->str; etp++)
++		{
++			if (!strcasecmp(etp->str, argv[4]))
++			{
++				ecctype = etp->type;
++				break;
++			}
++		}
++	}
++
+ 	if (argc - optind < 2)
+ 		return mkyaffs2_helper();
+ 
+@@ -1010,6 +1211,17 @@ main (int argc, char *argv[])
+ 		MKYAFFS2_WARN("warning: non-root users.\n\n");
+ 	}
+ 
++	if ((sel_oob_info = get_oob_info(pagetype, ecctype)) == NULL) {
++		fprintf(stderr, "not support this parameter.\n");
++		printf("Input parameter: pagetype: %d(%s), ecctype: %d(%s)\n",
++				pagetype, get_pagesize_str(pagetype),
++				ecctype, get_ecctype_str(ecctype));
++		return -1;
++	}
++
++	mkyaffs2_chunksize = get_pagesize(pagetype);
++	mkyaffs2_sparesize = sel_oob_info->oobsize;
++
+ 	/* veridate the page size */
+ 	mkyaffs2_writechunk = &mkyaffs2_yaffs2_writechunk;
+ 	switch (mkyaffs2_chunksize) {
+diff --git a/oob_config.h b/oob_config.h
+new file mode 100644
+index 0000000..cca06b8
+--- /dev/null
++++ b/oob_config.h
+@@ -0,0 +1,79 @@
++/******************************************************************************
++*    Copyright (c) 2009-2010 by czy.
++*    All rights reserved.
++* ***
++*    written by CaiZhiYong. 2010-10-13 14:01:19
++*
++******************************************************************************/
++
++
++#ifndef OOB_CONFIGH
++#define OOB_CONFIGH
++
++#define NANDIP_V300    0x300
++#define NANDIP_V301    0x301
++#define NANDIP_V504    0x504
++#define NANDIP_V610    0x610
++#define NANDIP_V400    0x400
++#define NANDIP_V100    0x100
++/******************************************************************************/
++
++/* this follow must be consistent with fastboot !!! */
++enum ecc_type
++{
++    et_ecc_none    = 0x00,
++    et_ecc_1bit    = 0x01,
++    et_ecc_4bytes  = 0x02,
++    et_ecc_4bit    = 0x02,
++    et_ecc_8bytes  = 0x03,
++    et_ecc_8bit    = 0x03,
++    et_ecc_24bit1k = 0x04,
++    et_ecc_40bit1k = 0x05,
++    et_ecc_64bit1k = 0x06,
++    et_ecc_last    = 0x07,
++};
++/*****************************************************************************/
++
++enum page_type
++{
++    pt_pagesize_512   = 0x00,
++    pt_pagesize_2K    = 0x01,
++    pt_pagesize_4K    = 0x02,
++    pt_pagesize_8K    = 0x03,
++    pt_pagesize_16K   = 0x04,
++    pt_pagesize_last  = 0x05,
++};
++
++/*****************************************************************************/
++
++struct nand_oob_free
++{
++	unsigned long offset;
++	unsigned long length;
++};
++/*****************************************************************************/
++
++struct oob_info
++{
++    unsigned int nandip;
++    enum page_type pagetype;
++    enum ecc_type ecctype;
++    unsigned int oobsize;
++    struct nand_oob_free *freeoob;
++};
++
++/*****************************************************************************/
++
++struct oob_info * get_oob_info(enum page_type pagetype, 
++    enum ecc_type ecctype);
++
++char *get_ecctype_str(enum ecc_type ecctype);
++
++char *get_pagesize_str(enum page_type pagetype);
++
++unsigned int get_pagesize(enum page_type pagetype);
++
++extern const char *nand_controller_version;
++
++/******************************************************************************/
++#endif /* OOB_CONFIGH */
+diff --git a/oob_config_v100.c b/oob_config_v100.c
+new file mode 100644
+index 0000000..cc0a50f
+--- /dev/null
++++ b/oob_config_v100.c
+@@ -0,0 +1,82 @@
++/******************************************************************************
++*    Copyright (c) 2009-2010 by Hisi
++*    All rights reserved.
++* ***
++*    written by Hisi. 2014-03-13 14:01:24
++*
++******************************************************************************/
++
++#include "oob_config.h"
++
++const char *nand_controller_version = "Flash Memory Controller V100";
++
++
++/*****************************************************************************/
++struct nand_oob_free oobfree_def[] =
++{
++    {2, 30}, {0, 0},
++};
++/*****************************************************************************/
++
++static struct oob_info hifmc100_oob_info[] =
++{
++    {NANDIP_V100, pt_pagesize_2K, et_ecc_4bit,    64,  oobfree_def},
++    {NANDIP_V100, pt_pagesize_2K, et_ecc_8bit,    88,  oobfree_def},
++    {NANDIP_V100, pt_pagesize_2K, et_ecc_24bit1k, 128, oobfree_def},
++
++    {NANDIP_V100, pt_pagesize_4K, et_ecc_4bit,    88,  oobfree_def},
++    {NANDIP_V100, pt_pagesize_4K, et_ecc_8bit,    144, oobfree_def},
++    {NANDIP_V100, pt_pagesize_4K, et_ecc_24bit1k, 200, oobfree_def},
++    
++    {0},
++};
++/*****************************************************************************/
++
++struct oob_info * get_oob_info(enum page_type pagetype, 
++    enum ecc_type ecctype)
++{
++    struct oob_info *info = hifmc100_oob_info;
++    
++    for (; info->freeoob; info++)
++    {
++        if (info->ecctype == ecctype
++            && info->pagetype == pagetype)
++        {
++            return info;
++        }
++    }
++
++    return 0;
++}
++/*****************************************************************************/
++
++char *get_ecctype_str(enum ecc_type ecctype)
++{
++    char *ecctype_str[et_ecc_last+1] = { (char *)"None", (char *)"1bit", 
++        (char *)"4bit", (char *)"8Bytes", (char *)"24bits/1K",
++	(char *)"40bits/1K", (char *)"64bits/1K"};
++    if (ecctype < et_ecc_none || ecctype > et_ecc_last)
++    {
++        ecctype = et_ecc_last;
++    }
++    return ecctype_str[ecctype];
++}
++/*****************************************************************************/
++
++char *get_pagesize_str(enum page_type pagetype)
++{
++    char *pagesize_str[pt_pagesize_last+1] = {(char *)"512", (char *)"2K",
++        (char *)"4K", (char *)"8K", (char *)"16K", (char *)"unknown" };
++    if (pagetype < pt_pagesize_512 || pagetype > pt_pagesize_last)
++    {
++        pagetype = pt_pagesize_last;
++    }
++    return pagesize_str[pagetype];
++}
++/*****************************************************************************/
++
++unsigned int get_pagesize(enum page_type pagetype)
++{
++    unsigned int pagesize[] = {512, 2048, 4096, 8192, 16384, 0};
++    return pagesize[pagetype];
++}
+diff --git a/oob_config_v100_nand.c b/oob_config_v100_nand.c
+new file mode 100644
+index 0000000..36caab6
+--- /dev/null
++++ b/oob_config_v100_nand.c
+@@ -0,0 +1,86 @@
++/******************************************************************************
++*    Copyright (c) 2009-2010 by Hisi
++*    All rights reserved.
++* ***
++*    written by Hisi. 2014-03-13 14:01:24
++*
++******************************************************************************/
++
++#include "oob_config.h"
++
++const char *nand_controller_version = "Nand Controller V610";
++
++
++/*****************************************************************************/
++struct nand_oob_free oobfree_def[] =
++{
++    {2, 30}, {0, 0},
++};
++/*****************************************************************************/
++static struct oob_info hinfc610_oob_info[] =
++{
++    {NANDIP_V100, pt_pagesize_2K, et_ecc_4bit,    64,  oobfree_def},
++    {NANDIP_V100, pt_pagesize_2K, et_ecc_24bit1k, 128, oobfree_def},
++
++    {NANDIP_V100, pt_pagesize_4K, et_ecc_4bit,    128,  oobfree_def},
++    {NANDIP_V100, pt_pagesize_4K, et_ecc_24bit1k, 200, oobfree_def},
++
++    {NANDIP_V100, pt_pagesize_8K, et_ecc_24bit1k, 368, oobfree_def},
++    {NANDIP_V100, pt_pagesize_8K, et_ecc_40bit1k, 600, oobfree_def},
++    {NANDIP_V100, pt_pagesize_8K, et_ecc_64bit1k, 928, oobfree_def},
++    
++    {NANDIP_V100, pt_pagesize_16K, et_ecc_40bit1k, 1200, oobfree_def},
++    {NANDIP_V100, pt_pagesize_16K, et_ecc_64bit1k, 1824, oobfree_def},
++
++    {0},
++};
++/*****************************************************************************/
++
++struct oob_info * get_oob_info(enum page_type pagetype, 
++    enum ecc_type ecctype)
++{
++    struct oob_info *info = hinfc610_oob_info; 
++    
++    for (; info->freeoob; info++)
++    {
++        if (info->ecctype == ecctype
++            && info->pagetype == pagetype)
++        {
++            return info;
++        }
++    }
++
++    return 0;
++}
++/*****************************************************************************/
++
++char *get_ecctype_str(enum ecc_type ecctype)
++{
++    char *ecctype_str[et_ecc_last+1] = { (char *)"None", (char *)"1bit", 
++        (char *)"4bit", (char *)"8Bytes", (char *)"24bits/1K",
++	(char *)"40bits/1K", (char *)"64bits/1K"};
++    if (ecctype < et_ecc_none || ecctype > et_ecc_last)
++    {
++        ecctype = et_ecc_last;
++    }
++    return ecctype_str[ecctype];
++}
++/*****************************************************************************/
++
++char *get_pagesize_str(enum page_type pagetype)
++{
++    char *pagesize_str[pt_pagesize_last+1] = {(char *)"512", (char *)"2K",
++        (char *)"4K", (char *)"8K", (char *)"16K", (char *)"unknown" };
++    if (pagetype < pt_pagesize_512 || pagetype > pt_pagesize_last)
++    {
++        pagetype = pt_pagesize_last;
++    }
++    return pagesize_str[pagetype];
++}
++/*****************************************************************************/
++
++unsigned int get_pagesize(enum page_type pagetype)
++{
++    unsigned int pagesize[] = {512, 2048, 4096, 8192, 16384, 0};
++    return pagesize[pagetype];
++}
+diff --git a/oob_config_v610.c b/oob_config_v610.c
+new file mode 100644
+index 0000000..a4d95f4
+--- /dev/null
++++ b/oob_config_v610.c
+@@ -0,0 +1,86 @@
++/******************************************************************************
++*    Copyright (c) 2009-2010 by Hisi
++*    All rights reserved.
++* ***
++*    written by Hisi. 2014-03-13 14:01:24
++*
++******************************************************************************/
++
++#include "oob_config.h"
++
++const char *nand_controller_version = "Nand Controller V610";
++
++
++/*****************************************************************************/
++struct nand_oob_free oobfree_def[] =
++{
++    {2, 30}, {0, 0},
++};
++/*****************************************************************************/
++static struct oob_info hinfc610_oob_info[] =
++{
++    {NANDIP_V610, pt_pagesize_2K, et_ecc_4bit,    64,  oobfree_def},
++    {NANDIP_V610, pt_pagesize_2K, et_ecc_24bit1k, 128, oobfree_def},
++
++    {NANDIP_V610, pt_pagesize_4K, et_ecc_4bit,    128,  oobfree_def},
++    {NANDIP_V610, pt_pagesize_4K, et_ecc_24bit1k, 200, oobfree_def},
++
++    {NANDIP_V610, pt_pagesize_8K, et_ecc_24bit1k, 368, oobfree_def},
++    {NANDIP_V610, pt_pagesize_8K, et_ecc_40bit1k, 600, oobfree_def},
++    {NANDIP_V610, pt_pagesize_8K, et_ecc_64bit1k, 928, oobfree_def},
++    
++    {NANDIP_V610, pt_pagesize_16K, et_ecc_40bit1k, 1200, oobfree_def},
++    {NANDIP_V610, pt_pagesize_16K, et_ecc_64bit1k, 1824, oobfree_def},
++
++    {0},
++};
++/*****************************************************************************/
++
++struct oob_info * get_oob_info(enum page_type pagetype, 
++    enum ecc_type ecctype)
++{
++    struct oob_info *info = hinfc610_oob_info; 
++    
++    for (; info->freeoob; info++)
++    {
++        if (info->ecctype == ecctype
++            && info->pagetype == pagetype)
++        {
++            return info;
++        }
++    }
++
++    return 0;
++}
++/*****************************************************************************/
++
++char *get_ecctype_str(enum ecc_type ecctype)
++{
++    char *ecctype_str[et_ecc_last+1] = { (char *)"None", (char *)"1bit", 
++        (char *)"4bit", (char *)"8Bytes", (char *)"24bits/1K",
++	(char *)"40bits/1K", (char *)"64bits/1K"};
++    if (ecctype < et_ecc_none || ecctype > et_ecc_last)
++    {
++        ecctype = et_ecc_last;
++    }
++    return ecctype_str[ecctype];
++}
++/*****************************************************************************/
++
++char *get_pagesize_str(enum page_type pagetype)
++{
++    char *pagesize_str[pt_pagesize_last+1] = {(char *)"512", (char *)"2K",
++        (char *)"4K", (char *)"8K", (char *)"16K", (char *)"unknown" };
++    if (pagetype < pt_pagesize_512 || pagetype > pt_pagesize_last)
++    {
++        pagetype = pt_pagesize_last;
++    }
++    return pagesize_str[pagetype];
++}
++/*****************************************************************************/
++
++unsigned int get_pagesize(enum page_type pagetype)
++{
++    unsigned int pagesize[] = {512, 2048, 4096, 8192, 16384, 0};
++    return pagesize[pagetype];
++}
+diff --git a/progress_bar.c b/progress_bar.c
+index 39a9908..45eeb05 100644
+--- a/progress_bar.c
++++ b/progress_bar.c
+@@ -51,18 +51,33 @@ progress_bar (unsigned current, unsigned max)
+ 	int used = maxdigits * 2 + 10;
+ 	int hashes = (current * (yaffs2_progress_columns - used)) / max;
+ 	int spaces = yaffs2_progress_columns - used - hashes;
++	int print_times = 0;
+ 
+ 	if (yaffs2_progress_columns - used < 0)
+ 		return;
+ 
+ 	printf("\r[");
+ 
+-	while (hashes-- > 0)
++	print_times = 0;
++	while (hashes-- > 0) {
++		print_times++;
++
+ 		putchar('=');
+ 
+-	while (spaces-- > 0)
++		if (print_times > 256)
++			break;
++	}
++
++	print_times = 0;
++	while (spaces-- > 0) {
++		print_times++;
++
+ 		putchar(' ');
+ 
++		if (print_times > 256)
++			break;
++	}
++
+ 	printf("] %*u/%*u", maxdigits, current, maxdigits, max);
+ 	printf(" %3u%%", current * 100 / max);
+ 	fflush(stdout);

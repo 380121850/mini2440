@@ -47,8 +47,8 @@ BUSYBOX_VER:=busybox-1.32.1
 TOOLCHAIN_RUNTIME_LIB_C:=lib.tgz
 
 TOOLCHAIN_RUNTIME_LIB:=a7_softfp_neon-vfpv4
-OSDRV_CROSS_CFLAGS:=-mcpu=cortex-a7 -mfloat-abi=softfp -mfpu=neon-vfpv4 -w
-
+OSDRV_CROSS_CFLAGS:=-mcpu=arm920t -mfloat-abi=softfp -w
+#  -mfpu=neon-vfpv4
 UBOOT_VER:=bootloader/u-boot
 UBOOT:=u-boot.bin
 export UBOOT_CONFIG:=mini2440_config
@@ -65,7 +65,7 @@ PUB_ROOTFS:=rootfs_basic
 
 EXT4_TOOL:=make_ext4fs
 EXT4_IMAGE_BIN:=rootfs_$(CHIP)_96M.ext4
-export PUB_BOARD:=board_$(LIB_TYPE)
+export PUB_BOARD:=board
 
 JFFS2_IMAGE_BIN_64K:=rootfs_$(CHIP)_64k.jffs2
 JFFS2_IMAGE_BIN_128K:=rootfs_$(CHIP)_128k.jffs2
@@ -111,7 +111,7 @@ ifeq ($(CROSS_SPECIFIED),y)
 
 all: prepare hiboot hikernel hirootfs_prepare hibusybox \
 	hipctools hiboardtools hirootfs_build
-clean: u-boot_clean kernel_clean busybox_clean rootfs_clean
+clean: u-boot_clean kernel_clean boardtools_clean pctools_clean busybox_clean rootfs_clean
 
 notools: hiboot hikernel hinotools_prepare hirootfs_notools_build
 distclean:clean pub_clean
@@ -146,9 +146,71 @@ u-boot_clean:
 	rm -rf $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(UBOOT)
 
 ##########################################################################################
+#	check_package :kernel and yaffs2 source file
+##########################################################################################
+check_kernel:
+
+ifeq ($(PACKAGE_YAFFS2), $(YAFFS2_TAR))
+result=$(shell echo "pass" || "fail")
+$(warning $(result))
+endif
+PACKAGE_YAFFS2 = $(shell find $(OSDRV_DIR)/tools/pc/mkyaffs2image/ \
+					-name "$(YAFFS2_TAR)")
+
+ifeq ($(PACKAGE_GDB), $(GDB_TAR))
+	result=$(shell echo "pass" || "fail")
+	$(warning $(result))
+endif
+
+ifeq ($(PACKAGE_NCURSES), $(NCURSES_TAR))
+	result=$(shell echo "pass" || "fail")
+	$(warning $(result))
+endif
+
+ifeq ($(PACKAGE_CRAMFS), $(CRAMFS_TAR))
+	result=$(shell echo "pass" || "fail")
+	$(warning $(result))
+endif
+
+PACKAGE_GDB = $(shell find $(OSDRV_DIR)/tools/board/gdb/ -name "$(GDB_TAR)")
+PACKAGE_NCURSES = $(shell find $(OSDRV_DIR)/tools/board/gdb/ -name "$(NCURSES_TAR)")
+PACKAGE_CRAMFS = $(shell find $(OSDRV_DIR)/tools/pc/cramfs_tool/ -name "$(CRAMFS_TAR)")
+
+ifeq ($(PACKAGE_YAFFS2), )
+$(warning "---------------------------------------------------------------------")
+$(warning "     Cannot found the $(YAFFS2_TAR)  source file		                ")
+$(warning "   Please download the compression package to osdrv/tools/pc/mkyaffs2image/")
+$(warning "---------------------------------------------------------------------")
+$(error )
+endif
+
+ifeq ($(PACKAGE_GDB), )
+$(warning "---------------------------------------------------------------------")
+$(warning "     Cannot found the $(GDB_TAR)  source file						")
+$(warning "   Please download the compression package to osdrv/tools/board/gdb/ ")
+$(warning "---------------------------------------------------------------------")
+$(error )
+endif
+
+ifeq ($(PACKAGE_NCURSES), )
+$(warning "---------------------------------------------------------------------")
+$(warning "     Cannot found the $(NCURSES_TAR) source file		                ")
+$(warning "   Please download the compression package to osdrv/tools/board/gdb/ ")
+$(warning "---------------------------------------------------------------------")
+$(error )
+endif
+
+ifeq ($(PACKAGE_CRAMFS), )
+$(warning "---------------------------------------------------------------------")
+$(warning "     Cannot found the $(CRAMFS_TAR) source file		                ")
+$(warning "   Please download the compression package to osdrv/tools/pc/cramfs_tool/ ")
+$(warning "---------------------------------------------------------------------")
+$(error )
+endif
+##########################################################################################
 #task [2]	build kernel
 ##########################################################################################
-kernel: prepare rootfs_prepare
+kernel: prepare boardtools busybox pctools
 	@echo "---------task [2] build kernel"
 	cp $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG) $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/configs/$(KERNEL_CFG)_defconfig
 	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- $(KERNEL_CFG)_defconfig
@@ -156,6 +218,16 @@ kernel: prepare rootfs_prepare
 	make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- uImage -j 16 >/dev/null;popd
 	cp $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/boot/uImage $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(UIMAGE)
 
+
+kernel_menuconfig:
+	cp $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG) $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/configs/$(KERNEL_CFG)_defconfig
+	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- $(KERNEL_CFG)_defconfig
+	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- menuconfig
+
+kernel_savecfg:
+	pushd $(OSDRV_DIR)/$(KERNEL_VER);\
+	cp .config $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG);popd
+	
 kernel_clean:
 	rm $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(UIMAGE) -rf
 	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- distclean
@@ -164,7 +236,7 @@ kernel_clean:
 ##########################################################################################
 #task [3]	prepare rootfs
 ##########################################################################################
-rootfs_prepare: prepare busybox
+rootfs_prepare: prepare
 	@echo "---------task [3] prepare rootfs "
 	tar xzf $(OSDRV_DIR)/rootfs/$(ROOT_FS_TAR) -C $(OSDRV_DIR)/pub
 
@@ -185,7 +257,7 @@ busybox_clean:
 ##########################################################################################
 #task [5]	build pc tools
 ##########################################################################################
-hipctools: prepare
+pctools: prepare
 	@echo "---------task [5] build tools which run on pc"
 	tar xf $(PACKAGE_YAFFS2) -C $(OSDRV_DIR)/tools/pc/mkyaffs2image/
 	pushd $(OSDRV_DIR)/tools/pc/mkyaffs2image/$(YAFFS2_VER);patch -p1 < ../$(YAFFS2_PATCH);popd
@@ -207,7 +279,7 @@ hipctools: prepare
 	make -C $(OSDRV_DIR)/tools/pc/nand_production/fmc_nand_ecc_product_v100
 	cp $(OSDRV_DIR)/tools/pc/nand_production/fmc_nand_ecc_product_v100/nand_product $(OSDRV_DIR)/pub/bin/pc
 
-hipctools_clean:
+pctools_clean:
 	make -C $(OSDRV_DIR)/tools/pc/mkyaffs2image clean
 	make -C $(OSDRV_DIR)/tools/pc/jffs2_tool distclean
 	make -C $(OSDRV_DIR)/tools/pc/cramfs_tool distclean
@@ -220,31 +292,21 @@ hipctools_clean:
 ##########################################################################################
 #task [6]	build board tools
 ##########################################################################################
-hiboardtools: hirootfs_prepare hiboardtools_clean
+boardtools: rootfs_prepare boardtools_clean
 	@echo "---------task [6] build tools which run on board "
 	make -C $(OSDRV_DIR)/tools/board/e2fsprogs
 	cp -af $(OSDRV_DIR)/tools/board/e2fsprogs/bin/* $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/bin
-	make -C $(OSDRV_DIR)/tools/board/reg-tools-1.0.0
-	cp -af $(OSDRV_DIR)/tools/board/reg-tools-1.0.0/bin/* $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/bin
-	make -C $(OSDRV_DIR)/tools/board/eudev-3.2.7/
-	cp -af $(OSDRV_DIR)/tools/board/eudev-3.2.7/rootfs/. $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/
-	tar xf $(PACKAGE_GDB) -C $(OSDRV_DIR)/tools/board/gdb/
-	pushd $(OSDRV_DIR)/tools/board/gdb/$(GDB_VER);patch -p1 < ../$(GDB_PATCH);popd
-	find $(OSDRV_DIR)/tools/board/gdb/$(GDB_VER) | xargs touch
-	make -C $(OSDRV_DIR)/tools/board/gdb
-	cp $(OSDRV_DIR)/tools/board/gdb/gdb-$(OSDRV_CROSS) $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)
+	#tar xf $(PACKAGE_GDB) -C $(OSDRV_DIR)/tools/board/gdb/
+	#pushd $(OSDRV_DIR)/tools/board/gdb/$(GDB_VER);patch -p1 < ../$(GDB_PATCH);popd
+	#find $(OSDRV_DIR)/tools/board/gdb/$(GDB_VER) | xargs touch
+	#make -C $(OSDRV_DIR)/tools/board/gdb
+	#cp $(OSDRV_DIR)/tools/board/gdb/gdb-$(OSDRV_CROSS) $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)
 	make -C $(OSDRV_DIR)/tools/board/mtd-utils/
 	cp $(OSDRV_DIR)/tools/board/mtd-utils/bin/* $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)
-	cp $(OSDRV_DIR)/tools/board/reg-tools-1.0.0/bin/himm $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)
-	cp $(OSDRV_DIR)/tools/board/reg-tools-1.0.0/bin/himc $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)
-	cp $(OSDRV_DIR)/tools/board/reg-tools-1.0.0/bin/himd $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)
-	cp $(OSDRV_DIR)/tools/board/reg-tools-1.0.0/bin/himd.l $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)
 
-hiboardtools_clean:
+boardtools_clean:
 	make -C $(OSDRV_DIR)/tools/board/e2fsprogs distclean
-	make -C $(OSDRV_DIR)/tools/board/reg-tools-1.0.0 clean
-	make -C $(OSDRV_DIR)/tools/board/eudev-3.2.7 clean
-	make -C $(OSDRV_DIR)/tools/board/gdb distclean
+	#make -C $(OSDRV_DIR)/tools/board/gdb distclean
 	make -C $(OSDRV_DIR)/tools/board/mtd-utils distclean
 
 ##########################################################################################
@@ -298,22 +360,6 @@ endif
 rootfs_clean:
 	rm $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/ -rf
 
-##########################################################################################
-#task [9] ipcm build
-##########################################################################################
-# smp not support hiipcm
-hiipcm:
-	@echo -e $(INFO)"------- task [9] build ipcm"$(DONE)
-	rm -rf  $(OSDRV_DIR)/components/ipcm/ipcm
-	pushd $(OSDRV_DIR)/components/ipcm;tar xzf ipcm.tgz -C .;popd
-	pushd  $(OSDRV_DIR)/components/ipcm/ipcm; make PLATFORM=$(CHIP) CFG=$(CHIP)_a7_liteos_config all; popd
-	pushd  $(OSDRV_DIR)/components/ipcm/ipcm; make PLATFORM=$(CHIP) CFG=$(CHIP)_a7_linux_config all; popd
-	cp $(OSDRV_DIR)/components/ipcm/ipcm/out/node_1/*.a $(OSDRV_DIR)/platform/liteos/out/$(CHIP)/lib
-	cp $(OSDRV_DIR)/components/ipcm/ipcm/out/node_0/sharefs $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/bin
-	cp $(OSDRV_DIR)/components/ipcm/ipcm/out/node_0/virt-tty $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/bin
-	cp $(OSDRV_DIR)/components/ipcm/ipcm/out/node_0/*.ko $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/komod
-hiipcm_clean:
-	rm -rf $(OSDRV_DIR)/components/ipcm/ipcm
 ##########################################################################################
 #task [10]	clean pub
 ##########################################################################################
