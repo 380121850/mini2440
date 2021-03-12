@@ -243,7 +243,7 @@ rootfs_prepare: prepare
 ##########################################################################################
 #task [4]	build busybox
 ##########################################################################################
-busybox: prepare
+busybox: prepare 
 	@echo "---------task [4] build busybox "
 	cp $(OSDRV_DIR)/$(BUSYBOX_VER)/$(BUSYBOX_CFG) $(OSDRV_DIR)/$(BUSYBOX_VER)/.config
 	pushd $(OSDRV_DIR)/$(BUSYBOX_VER)/;make -j 8 >/dev/null;popd
@@ -292,7 +292,7 @@ pctools_clean:
 ##########################################################################################
 #task [6]	build board tools
 ##########################################################################################
-boardtools: rootfs_prepare boardtools_clean
+boardtools:  boardtools_clean
 	@echo "---------task [6] build tools which run on board "
 	make -C $(OSDRV_DIR)/tools/board/e2fsprogs
 	cp -af $(OSDRV_DIR)/tools/board/e2fsprogs/bin/* $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/bin
