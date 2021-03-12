@@ -111,10 +111,7 @@ ifeq ($(CROSS_SPECIFIED),y)
 
 all: prepare hiboot hikernel hirootfs_prepare hibusybox \
 	hipctools hiboardtools hirootfs_build
-clean: u-boot_clean kernel_clean boardtools_clean pctools_clean busybox_clean rootfs_clean
-
-notools: hiboot hikernel hinotools_prepare hirootfs_notools_build
-distclean:clean pub_clean
+clean: u-boot_clean kernel_clean boardtools_clean pctools_clean busybox_clean rootfs_clean  pub_clean
 endif
 
 a:=$(shell $(OSDRV_CROSS)-gcc --version)
@@ -210,7 +207,7 @@ endif
 ##########################################################################################
 #task [2]	build kernel
 ##########################################################################################
-kernel: prepare boardtools busybox pctools
+kernel:boardtools 
 	@echo "---------task [2] build kernel"
 	cp $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG) $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/configs/$(KERNEL_CFG)_defconfig
 	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- $(KERNEL_CFG)_defconfig
@@ -240,10 +237,14 @@ rootfs_prepare: prepare
 	@echo "---------task [3] prepare rootfs "
 	tar xzf $(OSDRV_DIR)/rootfs/$(ROOT_FS_TAR) -C $(OSDRV_DIR)/pub
 
+rootfs_dev: prepare
+	@echo "---------task [4] prepare rootfs "
+	mknod $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/dev/console c 5 1
+
 ##########################################################################################
 #task [4]	build busybox
 ##########################################################################################
-busybox: prepare 
+busybox: rootfs_prepare
 	@echo "---------task [4] build busybox "
 	cp $(OSDRV_DIR)/$(BUSYBOX_VER)/$(BUSYBOX_CFG) $(OSDRV_DIR)/$(BUSYBOX_VER)/.config
 	pushd $(OSDRV_DIR)/$(BUSYBOX_VER)/;make -j 8 >/dev/null;popd
@@ -292,7 +293,7 @@ pctools_clean:
 ##########################################################################################
 #task [6]	build board tools
 ##########################################################################################
-boardtools:  boardtools_clean
+boardtools:busybox
 	@echo "---------task [6] build tools which run on board "
 	make -C $(OSDRV_DIR)/tools/board/e2fsprogs
 	cp -af $(OSDRV_DIR)/tools/board/e2fsprogs/bin/* $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/bin
