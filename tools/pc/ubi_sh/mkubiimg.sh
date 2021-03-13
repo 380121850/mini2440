@@ -16,9 +16,10 @@ function usage ()
 	echo "  Size            This ubifs partition size in NAND. 48M, ... 50M"
 	echo "  UBI Tool        The path of mkfs.ubifs and ubinize"
 	echo "  Res             Reserve ubiimg and ubifs both (1:Yes 0:No(default))"
+	echo "  Partname        Partion Name"
 	echo ""
 	echo "Example:"
-	echo "  ${selfname} hi35xx 2k 128k osdrv/pub/rootfs 50M osdrv/pub/bin/pc 0"
+	echo "  ${selfname} hi35xx 2k 128k osdrv/pub/rootfs 50M osdrv/pub/bin/pc 0 rootfs"
 	echo ""
 	exit 0
 }
@@ -56,9 +57,7 @@ function hstrtol ()
 #echo "--------------->               <---------"
 ###############################################################################
 
-selfname=$(basename $0)
-
-if [ $# != 7 ] && [ $# != 6 ]; then
+if [ $# != 8 ]; then
 	usage;
 fi
 
@@ -67,6 +66,7 @@ pagesize=$(hstrtol ${hpagesize})
 hblocksize=${3}
 blocksize=$(hstrtol ${hblocksize})
 rootdir=$(echo $(echo "${4} " | sed 's/\/ //'))
+Partname=${8}
 #rootfs=${rootdir##*/}
 rootfs=rootfs
 hpartsize=${5}
@@ -78,18 +78,24 @@ if [ ! -d ${rootdir} ]; then
 	exit 1;
 fi
 
-LEB=$((${blocksize} - ${pagesize} * 2))
+LEB=$((${blocksize} - ${pagesize} * 1))
 MAX_LEB_CNT=$((${partsize} / ${blocksize}))
 ###############################################################################
 
-ubiimg=${rootfs}_${chip}_${hpagesize}_${hblocksize}_${hpartsize}.ubiimg
-ubifsimg=${rootfs}_${chip}_${hpagesize}_${hblocksize}_${hpartsize}.ubifs
-ubicfg=${rootfs}_${chip}_${hpagesize}_${hblocksize}_${hpartsize}.ubicfg
+ubiimg=${Partname}_${chip}_${hpagesize}_${hblocksize}_${hpartsize}.ubiimg
+ubifsimg=${Partname}_${chip}_${hpagesize}_${hblocksize}_${hpartsize}.ubifs
+ubicfg=${Partname}_${chip}_${hpagesize}_${hblocksize}_${hpartsize}.ubicfg
 
 MKUBIFS=$(echo $(echo "${6} " | sed 's/\/ //'))/mkfs.ubifs
 MKUBI=$(echo $(echo "${6} " | sed 's/\/ //'))/ubinize
 chmod +x ${MKUBIFS}
 chmod +x ${MKUBI}
+
+	echo ${rootdir}
+	echo ${pagesize}
+	echo ${ubiimg}
+	echo ${LEB}
+	echo ${MAX_LEB_CNT}
 
 run "${MKUBIFS} -F -d ${rootdir} -m ${pagesize} -o ${ubiimg} -e ${LEB} -c ${MAX_LEB_CNT}"
 
@@ -100,19 +106,15 @@ run "${MKUBIFS} -F -d ${rootdir} -m ${pagesize} -o ${ubiimg} -e ${LEB} -c ${MAX_
 	echo "vol_id=0"
 	echo "vol_type=dynamic"
 	echo "vol_alignment=1"
-	echo "vol_name=ubifs"
+	echo "vol_name=${Partname}"
 	echo "vol_flags=autoresize"
 	echo ""
 
 } > ${ubicfg}
 
-run "${MKUBI} -o ${ubifsimg} -m ${pagesize} -p ${blocksize} ${ubicfg}"
+run "${MKUBI} -o ${ubifsimg} -m ${pagesize} -p ${blocksize} -s 512 ${ubicfg}"
 
 
 echo "--------- ${ubifsimg} is prepared !!"
-if [ ! -n "${7}" ] || [ ${7} = 0 ]; then
-	rm -f ${ubiimg} ${ubicfg}
-	exit 1;
-fi
 echo "--------- ${ubiimg} is prepared !!"
 echo "--------- ${ubicfg} is prepared !!"

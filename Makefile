@@ -9,6 +9,7 @@ export CROSS_COMPILE=$(OSDRV_CROSS)-
 export OSDRV_CROSS_CFLAGS
 MP_TYPE=sigle
 BOOT_MEDIA?=spi
+PUB_BOARD:=board
 
 ifneq ($(BOOT_MEDIA),spi)
 ifneq ($(BOOT_MEDIA),emmc)
@@ -25,14 +26,6 @@ endif
 endif
 ifeq ($(OSDRV_CROSS), )
 $(error you must set OSDRV_CROSS first!)
-endif
-ifeq ($(OSDRV_CROSS),arm-himix100-linux)
-LIB_TYPE:=uclibc
-BUSYBOX_CFG:=config_v100_a7_softfp_neon
-TOOLCHAIN_DIR:=arm-himix100-linux
-TOOLCHAINI_VERSION:=
-RUNTIME_LIB:=runtime_uclibc
-CROSS_SPECIFIED:=y
 endif
 
 ifeq ($(OSDRV_CROSS),arm-linux)
@@ -63,9 +56,12 @@ PUB_IMAGE:=$(CHIP)_$(BOOT_MEDIA)_image_$(LIB_TYPE)
 ROOT_FS_TAR:=rootfs_basic.tar.gz
 PUB_ROOTFS:=rootfs_basic
 
+APP_FS_TAR:=app.tar.gz
+PUB_APPFS:=app
+
 EXT4_TOOL:=make_ext4fs
 EXT4_IMAGE_BIN:=rootfs_$(CHIP)_96M.ext4
-export PUB_BOARD:=board
+
 
 JFFS2_IMAGE_BIN_64K:=rootfs_$(CHIP)_64k.jffs2
 JFFS2_IMAGE_BIN_128K:=rootfs_$(CHIP)_128k.jffs2
@@ -313,89 +309,29 @@ boardtools_clean:
 ##########################################################################################
 #task [7]	build rootfs
 ##########################################################################################
-hirootfs_build: rootfs_prepare busybox hirootfs_notools_build
-hirootfs_notools_build:
+#hirootfs_build: rootfs_prepare busybox hirootfs_notools_build
+app:rootfs_prepare
 	@echo "---------task [7] build rootfs"
-	chmod 777 $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)/*
+	#chmod 777 $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)/*
 	chmod 777 $(OSDRV_DIR)/pub/bin/pc/*
-	rm $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/dev/* -rf
-	rm $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/bin/himm -rf
-	rm $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/bin/himc -rf
-	rm $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/bin/himd -rf
-	rm $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/bin/himd.l -rf
-	pushd $(OSDRV_DIR)/pub/$(PUB_ROOTFS);ln -s sbin/init init;popd
-	pushd $(OSDRV_DIR)/pub/$(PUB_ROOTFS); chmod 750 * -R; chmod 750 usr/* -R; popd
-	pushd $(OSDRV_DIR)/pub/$(PUB_ROOTFS); chmod -w usr/bin -R; chmod -w usr/sbin -R; chmod -w sbin -R; popd
-
-ifeq ($(BOOT_MEDIA),spi)
-	pushd $(OSDRV_DIR)/pub/bin/pc;./mkfs.jffs2 -d $(OSDRV_DIR)/pub/$(PUB_ROOTFS) -l -e 0x40000 -o $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(JFFS2_IMAGE_BIN_256K);popd
-	pushd $(OSDRV_DIR)/pub/bin/pc;./mkfs.jffs2 -d $(OSDRV_DIR)/pub/$(PUB_ROOTFS) -l -e 0x20000 -o $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(JFFS2_IMAGE_BIN_128K);popd
-	pushd $(OSDRV_DIR)/pub/bin/pc;./mkfs.jffs2 -d $(OSDRV_DIR)/pub/$(PUB_ROOTFS) -l -e 0x10000 -o $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(JFFS2_IMAGE_BIN_64K);popd
+	
+	tar xzf $(OSDRV_DIR)/rootfs/$(APP_FS_TAR) -C $(OSDRV_DIR)/pub
 
 	cp $(OSDRV_DIR)/tools/pc/ubi_sh/mkubiimg.sh $(OSDRV_DIR)/pub/$(PUB_IMAGE)
 	chmod +x $(OSDRV_DIR)/pub/$(PUB_IMAGE)/mkubiimg.sh
-	# build the pagesize = 2k, blocksize = 128k, part_size = 32M #
-	pushd $(OSDRV_DIR)/pub/$(PUB_IMAGE);./mkubiimg.sh $(CHIP) 2k 128k $(OSDRV_DIR)/pub/$(PUB_ROOTFS) 32M $(OSDRV_DIR)/pub/bin/pc;popd
-	# build the pagesize = 4k, blocksize = 256k, part_size = 50M #
-	pushd $(OSDRV_DIR)/pub/$(PUB_IMAGE);./mkubiimg.sh $(CHIP) 4k 256k $(OSDRV_DIR)/pub/$(PUB_ROOTFS) 50M $(OSDRV_DIR)/pub/bin/pc;popd
+	
+	# build the pagesize = 2k, blocksize = 128k, part_size = 254336KB #
+	pushd $(OSDRV_DIR)/pub/$(PUB_IMAGE);./mkubiimg.sh  $(CHIP) 2k 128k $(OSDRV_DIR)/pub/$(PUB_APPFS) 254336KB $(OSDRV_DIR)/pub/bin/pc 0 app;popd
+	
 	rm $(OSDRV_DIR)/pub/$(PUB_IMAGE)/mkubiimg.sh
-endif
-ifeq ($(BOOT_MEDIA),emmc)
-	pushd $(OSDRV_DIR)/pub/bin/pc;./$(EXT4_TOOL) -l 96M -s $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(EXT4_IMAGE_BIN) $(OSDRV_DIR)/pub/$(PUB_ROOTFS);popd
-endif
-ifeq ($(BOOT_MEDIA),spi)
-	pushd $(OSDRV_DIR)/pub/bin/pc;./$(YAFFS_TOOL) $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/ $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(YAFFS2_IMAGE_BIN_2K_4BIT) 1 2;popd
-	chmod 644 $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(YAFFS2_IMAGE_BIN_2K_4BIT)
-	pushd $(OSDRV_DIR)/pub/bin/pc;./$(YAFFS_TOOL) $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/ $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(YAFFS2_IMAGE_BIN_2K_24BIT) 1 4;popd
-	chmod 644 $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(YAFFS2_IMAGE_BIN_2K_24BIT)
-	pushd $(OSDRV_DIR)/pub/bin/pc;./$(YAFFS_TOOL) $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/ $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(YAFFS2_IMAGE_BIN_4K_4BIT) 2 2;popd
-	chmod 644 $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(YAFFS2_IMAGE_BIN_4K_4BIT)
-	pushd $(OSDRV_DIR)/pub/bin/pc;./$(YAFFS_TOOL) $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/ $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(YAFFS2_IMAGE_BIN_4K_24BIT) 2 4;popd
-	chmod 644 $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(YAFFS2_IMAGE_BIN_4K_24BIT)
-endif
-	find $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/ -name '*svn' | xargs rm -rf
-	pushd $(OSDRV_DIR)/pub/$(PUB_ROOTFS); chmod +w usr/bin -R; chmod +w usr/sbin -R; chmod +w sbin -R; popd
-	pushd $(OSDRV_DIR)/pub;tar czf $(PUB_ROOTFS).tgz $(PUB_ROOTFS);rm $(PUB_ROOTFS) -rf;popd
+
 	@echo "---------finish osdrv work"
 
-rootfs_clean:
-	rm $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/ -rf
+app_clean:
+	rm $(OSDRV_DIR)/pub/$(PUB_APPFS)/ -rf
 
 ##########################################################################################
 #task [10]	clean pub
 ##########################################################################################
 pub_clean:
 	rm $(OSDRV_DIR)/pub/* -rf
-
-##########################################################################################
-#task [11]  a7 liteos build
-##########################################################################################
-# smp not support hiliteos
-hiliteos: prepare
-ifneq ($(OSDRV_DIR)/platform/liteos, $(wildcard $(OSDRV_DIR)/platform/liteos))
-	pushd $(OSDRV_DIR)/platform;tar xzf liteos.tgz;popd
-else
-	@echo -e $(NOTE)"Attention:"$(DONE)
-	@echo -e $(NOTE)"you should compile ipcm for new libs!"$(DONE)
-endif
-	pushd $(OSDRV_DIR)/platform/liteos;cp ./tools/build/config/$(CHIP)_defconfig .config;make -j 20 >/dev/null;popd
-
-hiliteos_clean:
-	make -C $(OSDRV_DIR)/platform/liteos clean
-hiliteos_distclean:
-	make -C $(OSDRV_DIR)/platform/liteos clean
-hiliteos_dirclean:
-	rm -rf $(OSDRV_DIR)/platform/liteos
-
-##########################################################################################
-#task [12]  a7 liteos sample.bin build
-##########################################################################################
-# smp not support hiliteos
-hiliteos_sample: prepare hiliteos
-	pushd $(OSDRV_DIR)/platform/liteos/sample/sample_osdrv; \
-	make >/dev/null; \
-	cp sample.bin $(OSDRV_DIR)/pub/$(PUB_IMAGE); \
-	popd
-
-hiliteos_sample_clean:
-	make -C $(OSDRV_DIR)/platform/liteos/sample/sample_osdrv clean

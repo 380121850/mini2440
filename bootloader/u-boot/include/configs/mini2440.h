@@ -148,7 +148,7 @@
 /* USB Support*/
 
 #define CONFIG_BOOTDELAY	1
-#define CONFIG_BOOTARGS		"noinitrd root=/dev/ram0 console=ttySAC0 init=/linuxrc"" "MTDPARTS_DEFAULT
+#define CONFIG_BOOTARGS		"noinitrd ubi.mtd=3 root=ubi0:app rootfstype=ubifs rw console=ttySAC0 init=/linuxrc"" "MTDPARTS_DEFAULT
 #define CONFIG_ETHADDR	        08:08:11:18:12:27
 #define CONFIG_NETMASK          255.255.255.0
 #define CONFIG_IPADDR		192.168.50.230
