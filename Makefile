@@ -12,18 +12,13 @@ BOOT_MEDIA?=spi
 PUB_BOARD:=board
 
 ifneq ($(BOOT_MEDIA),spi)
-ifneq ($(BOOT_MEDIA),emmc)
-$(error you must set valid BOOT_MEDIA:spi or emmc!)
-endif
+$(error you must set valid BOOT_MEDIA:spi!)
 endif
 
 ifneq ($(CHIP),s3c2440)
-ifneq ($(CHIP),hi3516dv300)
-ifneq ($(CHIP),hi3516av300)
-$(error you must set valid CHIP:hi3516dv300 、 hi3516av300 or s3c2440!)
+$(error you must set valid CHIP:s3c2440!)
 endif
-endif
-endif
+
 ifeq ($(OSDRV_CROSS), )
 $(error you must set OSDRV_CROSS first!)
 endif
@@ -35,16 +30,16 @@ CROSS_SPECIFIED:=y
 endif
 
 BUSYBOX_CFG:=fa.config
-#BUSYBOX_VER:=busybox-1.13.3
 BUSYBOX_VER:=busybox-1.32.1
 TOOLCHAIN_RUNTIME_LIB_C:=lib.tgz
 
 TOOLCHAIN_RUNTIME_LIB:=a7_softfp_neon-vfpv4
 OSDRV_CROSS_CFLAGS:=-mcpu=arm920t -mfloat-abi=softfp -w
 #  -mfpu=neon-vfpv4
+
 UBOOT_VER:=bootloader/u-boot
 UBOOT:=u-boot.bin
-export UBOOT_CONFIG:=mini2440_config
+UBOOT_CONFIG:=mini2440_config
 
 
 KERNEL_VER:=linux-2.6.32.2
@@ -59,22 +54,6 @@ PUB_ROOTFS:=rootfs_basic
 APP_FS_TAR:=app.tar.gz
 PUB_APPFS:=app
 
-EXT4_TOOL:=make_ext4fs
-EXT4_IMAGE_BIN:=rootfs_$(CHIP)_96M.ext4
-
-
-JFFS2_IMAGE_BIN_64K:=rootfs_$(CHIP)_64k.jffs2
-JFFS2_IMAGE_BIN_128K:=rootfs_$(CHIP)_128k.jffs2
-JFFS2_IMAGE_BIN_256K:=rootfs_$(CHIP)_256k.jffs2
-
-YAFFS2_PATCH:= hi_yaffs2utils.patch
-YAFFS2_VER:= yaffs2utils-0.2.9
-YAFFS2_TAR:=$(YAFFS2_VER).tar.gz
-YAFFS_TOOL:=mkyaffs2image100
-YAFFS2_IMAGE_BIN_2K_4BIT:=rootfs_$(CHIP)_2k_4bit.yaffs2
-YAFFS2_IMAGE_BIN_2K_24BIT:=rootfs_$(CHIP)_2k_24bit.yaffs2
-YAFFS2_IMAGE_BIN_4K_4BIT:=rootfs_$(CHIP)_4k_4bit.yaffs2
-YAFFS2_IMAGE_BIN_4K_24BIT:=rootfs_$(CHIP)_4k_24bit.yaffs2
 
 GDB_PATCH:= hi-gdb-7.9.1.patch
 GDB_VER:= gdb-7.9.1
@@ -83,19 +62,8 @@ NCURSES_VER:= ncurses-6.0
 NCURSES_TAR:=$(NCURSES_VER).tar.gz
 CRAMFS_VER:= util-linux-2.31
 CRAMFS_TAR:=$(CRAMFS_VER).tar.gz
-
 HIREGBING_PACKAGE_VER:=hiregbin-v5.0.1
-ifeq ($(TARGET_XLSM),)
-ifeq ($(CHIP), hi3516dv300)
-TARGET_XLSM:=Hi3516DV300-DMEB_4L_FLYBY-DDR3_1800M_512MB_16bitx2-A7_900M-SYSBUS_300M.xlsm
-endif
-ifeq ($(CHIP), hi3516av300)
-TARGET_XLSM:=Hi3516AV300-DMEB_4L_FLYBY-DDR3_2133M_512MB_16bitx2-A7_900M-SYSBUS_300M.xlsm
-endif
-ifeq ($(CHIP), hi3516cv500)
-TARGET_XLSM:=Hi3516CV500-DMEB_4L-DDR3_1800M_256MB_16bit-A7_900M-SYSBUS_300M.xlsm
-endif
-endif
+
 
 TOOLCHAIN_FILE:= $(shell which $(OSDRV_CROSS)-gcc )
 TOOLCHAIN_DIR:=$(shell dirname $(shell dirname $(TOOLCHAIN_FILE)))
@@ -104,9 +72,8 @@ RUNTIMELIB_DIR=$(shell dirname $(TOOLCHAIN_DIR))/$(OSDRV_CROSS)/$(RUNTIME_LIB)
 #	set task
 ##########################################################################################
 ifeq ($(CROSS_SPECIFIED),y)
+all: prepare hiboot hikernel hirootfs_prepare hibusybox hipctools hiboardtools hirootfs_build
 
-all: prepare hiboot hikernel hirootfs_prepare hibusybox \
-	hipctools hiboardtools hirootfs_build
 clean: u-boot_clean kernel_clean boardtools_clean pctools_clean busybox_clean rootfs_clean  pub_clean
 endif
 
