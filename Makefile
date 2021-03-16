@@ -45,6 +45,8 @@ UBOOT_CONFIG:=mini2440_config
 KERNEL_VER:=linux-2.6.32.2
 UIMAGE:=uImage
 KERNEL_CFG:=config_mini2440_x35
+KERNEL_DIR=$(OSDRV_DIR)/$(KERNEL_VER)
+KO_TARGET_DIR=$(OSDRV_DIR)/pub/app/ko
 
 PUB_IMAGE:=$(CHIP)_$(BOOT_MEDIA)_image_$(LIB_TYPE)
 
@@ -54,6 +56,22 @@ PUB_ROOTFS:=rootfs_basic
 APP_FS_TAR:=app.tar.gz
 PUB_APPFS:=app
 
+EXT4_TOOL:=make_ext4fs
+EXT4_IMAGE_BIN:=rootfs_$(CHIP)_96M.ext4
+
+
+JFFS2_IMAGE_BIN_64K:=rootfs_$(CHIP)_64k.jffs2
+JFFS2_IMAGE_BIN_128K:=rootfs_$(CHIP)_128k.jffs2
+JFFS2_IMAGE_BIN_256K:=rootfs_$(CHIP)_256k.jffs2
+
+YAFFS2_PATCH:= hi_yaffs2utils.patch
+YAFFS2_VER:= yaffs2utils-0.2.9
+YAFFS2_TAR:=$(YAFFS2_VER).tar.gz
+YAFFS_TOOL:=mkyaffs2image100
+YAFFS2_IMAGE_BIN_2K_4BIT:=rootfs_$(CHIP)_2k_4bit.yaffs2
+YAFFS2_IMAGE_BIN_2K_24BIT:=rootfs_$(CHIP)_2k_24bit.yaffs2
+YAFFS2_IMAGE_BIN_4K_4BIT:=rootfs_$(CHIP)_4k_4bit.yaffs2
+YAFFS2_IMAGE_BIN_4K_24BIT:=rootfs_$(CHIP)_4k_24bit.yaffs2
 
 GDB_PATCH:= hi-gdb-7.9.1.patch
 GDB_VER:= gdb-7.9.1
@@ -170,14 +188,13 @@ endif
 ##########################################################################################
 #task [2]	build kernel
 ##########################################################################################
-kernel:boardtools 
+kernel:busybox 
 	@echo "---------task [2] build kernel"
 	cp $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG) $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/configs/$(KERNEL_CFG)_defconfig
 	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- $(KERNEL_CFG)_defconfig
 	pushd $(OSDRV_DIR)/$(KERNEL_VER);\
 	make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- uImage -j 16 >/dev/null;popd
 	cp $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/boot/uImage $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(UIMAGE)
-
 
 kernel_menuconfig:
 	cp $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG) $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/configs/$(KERNEL_CFG)_defconfig
@@ -187,6 +204,31 @@ kernel_menuconfig:
 kernel_savecfg:
 	pushd $(OSDRV_DIR)/$(KERNEL_VER);\
 	cp .config $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG);popd
+
+kernel_modules:prepare 
+	pushd $(KERNEL_DIR)/;make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)-  modules -j 16;popd
+	
+	#EXT4
+	cp $(KERNEL_DIR)/fs/mbcache.ko   $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/fs/jbd2/jbd2.ko $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/fs/ext4/ext4.ko $(KO_TARGET_DIR)/
+	#cp $(KERNEL_DIR)/lib/crc16.ko    $(KO_TARGET_DIR)/
+	
+	#NFS
+	cp $(KERNEL_DIR)/fs/lockd/lockd.ko                         $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/crypto/cbc.ko                             $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/fs/nfs/nfs.ko                             $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/net/sunrpc/sunrpc.ko                      $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/crypto/md5.ko                             $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/net/sunrpc/auth_gss/rpcsec_gss_krb5.ko    $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/fs/nfs_common/nfs_acl.ko                  $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/crypto/des_generic.ko                     $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/net/sunrpc/auth_gss/auth_rpcgss.ko        $(KO_TARGET_DIR)/
+
+	#mmc
+	cp $(KERNEL_DIR)/drivers/mmc/card/mmc_block.ko   $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/drivers/mmc/core/mmc_core.ko    $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/drivers/mmc/host/s3cmci.ko      $(KO_TARGET_DIR)/
 	
 kernel_clean:
 	rm $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(UIMAGE) -rf
@@ -210,7 +252,7 @@ rootfs_dev: prepare
 busybox: rootfs_prepare
 	@echo "---------task [4] build busybox "
 	cp $(OSDRV_DIR)/$(BUSYBOX_VER)/$(BUSYBOX_CFG) $(OSDRV_DIR)/$(BUSYBOX_VER)/.config
-	pushd $(OSDRV_DIR)/$(BUSYBOX_VER)/;make -j 8 >/dev/null;popd
+	pushd $(OSDRV_DIR)/$(BUSYBOX_VER)/;make -j 16 >/dev/null;popd
 	make -C $(OSDRV_DIR)/$(BUSYBOX_VER) install
 	cp -af $(OSDRV_DIR)/$(BUSYBOX_VER)/_install/* $(OSDRV_DIR)/pub/$(PUB_ROOTFS)
 
@@ -221,24 +263,24 @@ busybox_clean:
 ##########################################################################################
 #task [5]	build pc tools
 ##########################################################################################
-pctools: prepare
+pctools: pctools_clean prepare
 	@echo "---------task [5] build tools which run on pc"
 	tar xf $(PACKAGE_YAFFS2) -C $(OSDRV_DIR)/tools/pc/mkyaffs2image/
 	pushd $(OSDRV_DIR)/tools/pc/mkyaffs2image/$(YAFFS2_VER);patch -p1 < ../$(YAFFS2_PATCH);popd
 	find $(OSDRV_DIR)/tools/pc/mkyaffs2image/$(YAFFS2_VER) | xargs touch
-	make -C $(OSDRV_DIR)/tools/pc/mkyaffs2image/
+	make -C $(OSDRV_DIR)/tools/pc/mkyaffs2image/ -j 16
 	cp $(OSDRV_DIR)/tools/pc/mkyaffs2image/bin/$(YAFFS_TOOL) $(OSDRV_DIR)/pub/bin/pc
 	make -C $(OSDRV_DIR)/tools/pc/jffs2_tool/
 	cp $(OSDRV_DIR)/tools/pc/jffs2_tool/mkfs.jffs2 $(OSDRV_DIR)/pub/bin/pc
 	cp $(OSDRV_DIR)/tools/pc/jffs2_tool/mkfs.ubifs $(OSDRV_DIR)/pub/bin/pc
 	cp $(OSDRV_DIR)/tools/pc/jffs2_tool/ubinize $(OSDRV_DIR)/pub/bin/pc
-	make -C $(OSDRV_DIR)/tools/pc/cramfs_tool/
+	make -C $(OSDRV_DIR)/tools/pc/cramfs_tool/ -j 16
 	cp $(OSDRV_DIR)/tools/pc/cramfs_tool/mkfs.cramfs $(OSDRV_DIR)/pub/bin/pc
-	make -C $(OSDRV_DIR)/tools/pc/squashfs4.3/
+	make -C $(OSDRV_DIR)/tools/pc/squashfs4.3/ -j 16
 	cp $(OSDRV_DIR)/tools/pc/squashfs4.3/mksquashfs $(OSDRV_DIR)/pub/bin/pc
-	make -C $(OSDRV_DIR)/tools/pc/lzma_tool/
+	make -C $(OSDRV_DIR)/tools/pc/lzma_tool/ -j 16
 	cp $(OSDRV_DIR)/tools/pc/lzma_tool/lzma $(OSDRV_DIR)/pub/bin/pc
-	make -C $(OSDRV_DIR)/tools/pc/ext4_utils/
+	make -C $(OSDRV_DIR)/tools/pc/ext4_utils/ -j 16
 	cp $(OSDRV_DIR)/tools/pc/ext4_utils/bin/$(EXT4_TOOL) $(OSDRV_DIR)/pub/bin/pc
 	make -C $(OSDRV_DIR)/tools/pc/nand_production/fmc_nand_ecc_product_v100
 	cp $(OSDRV_DIR)/tools/pc/nand_production/fmc_nand_ecc_product_v100/nand_product $(OSDRV_DIR)/pub/bin/pc
@@ -256,17 +298,17 @@ pctools_clean:
 ##########################################################################################
 #task [6]	build board tools
 ##########################################################################################
-boardtools:busybox
+boardtools:
 	@echo "---------task [6] build tools which run on board "
 	make -C $(OSDRV_DIR)/tools/board/e2fsprogs
-	cp -af $(OSDRV_DIR)/tools/board/e2fsprogs/bin/* $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/bin
+	cp -af $(OSDRV_DIR)/tools/board/e2fsprogs/bin/* $(OSDRV_DIR)/pub/$(PUB_APPFS)/tools
 	#tar xf $(PACKAGE_GDB) -C $(OSDRV_DIR)/tools/board/gdb/
 	#pushd $(OSDRV_DIR)/tools/board/gdb/$(GDB_VER);patch -p1 < ../$(GDB_PATCH);popd
 	#find $(OSDRV_DIR)/tools/board/gdb/$(GDB_VER) | xargs touch
 	#make -C $(OSDRV_DIR)/tools/board/gdb
-	#cp $(OSDRV_DIR)/tools/board/gdb/gdb-$(OSDRV_CROSS) $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)
+	#cp $(OSDRV_DIR)/tools/board/gdb/gdb-$(OSDRV_CROSS) $(OSDRV_DIR)/pub/$(PUB_APPFS)/tools
 	make -C $(OSDRV_DIR)/tools/board/mtd-utils/
-	cp $(OSDRV_DIR)/tools/board/mtd-utils/bin/* $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)
+	cp $(OSDRV_DIR)/tools/board/mtd-utils/bin/* $(OSDRV_DIR)/pub/$(PUB_APPFS)/tools
 
 boardtools_clean:
 	make -C $(OSDRV_DIR)/tools/board/e2fsprogs distclean
@@ -277,16 +319,20 @@ boardtools_clean:
 #task [7]	build rootfs
 ##########################################################################################
 #hirootfs_build: rootfs_prepare busybox hirootfs_notools_build
-app:rootfs_prepare
+app_prepare:prepare
 	@echo "---------task [7] build rootfs"
-	#chmod 777 $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)/*
-	chmod 777 $(OSDRV_DIR)/pub/bin/pc/*
+	#chmod 777 -R $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)/*
+	#chmod 777 -R $(OSDRV_DIR)/pub/bin/pc/*
 	
 	tar xzf $(OSDRV_DIR)/rootfs/$(APP_FS_TAR) -C $(OSDRV_DIR)/pub
 
 	cp $(OSDRV_DIR)/tools/pc/ubi_sh/mkubiimg.sh $(OSDRV_DIR)/pub/$(PUB_IMAGE)
 	chmod +x $(OSDRV_DIR)/pub/$(PUB_IMAGE)/mkubiimg.sh
-	
+
+app:app_clean app_prepare pctools boardtools kernel_modules
+	#$(OSDRV_CROSS)-strip $(OSDRV_DIR)/pub/$(PUB_APPFS)/tools/* >/dev/null;
+	#$(OSDRV_CROSS)-strip $(OSDRV_DIR)/pub/$(PUB_APPFS)/bin/* >/dev/null;
+	#$(OSDRV_CROSS)-strip $(OSDRV_DIR)/pub/$(PUB_APPFS)/lib/* >/dev/null;
 	# build the pagesize = 2k, blocksize = 128k, part_size = 254336KB #
 	pushd $(OSDRV_DIR)/pub/$(PUB_IMAGE);./mkubiimg.sh  $(CHIP) 2k 128k $(OSDRV_DIR)/pub/$(PUB_APPFS) 254336KB $(OSDRV_DIR)/pub/bin/pc 0 app;popd
 	
@@ -294,7 +340,7 @@ app:rootfs_prepare
 
 	@echo "---------finish osdrv work"
 
-app_clean:
+app_clean:pctools_clean
 	rm $(OSDRV_DIR)/pub/$(PUB_APPFS)/ -rf
 
 ##########################################################################################
