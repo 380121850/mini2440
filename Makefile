@@ -81,7 +81,19 @@ NCURSES_TAR:=$(NCURSES_VER).tar.gz
 CRAMFS_VER:= util-linux-2.31
 CRAMFS_TAR:=$(CRAMFS_VER).tar.gz
 HIREGBING_PACKAGE_VER:=hiregbin-v5.0.1
+ZLIB_TAR:=zlib-1.2.11.tar.gz
+PCRE_TAR:=pcre-8.44.tar.gz
+OPENSSL_TAR:=openssl-1.1.1j.tar.gz
 
+ZLIB_DIR:=$(OSDRV_DIR)/tools/board/zlib/
+PCRE_DIR:=$(OSDRV_DIR)/tools/board/pcre/
+OPENSSL_DIR:=$(OSDRV_DIR)/tools/board/openssl/
+
+ZLIB_UNPACK_DIR:=$(ZLIB_DIR)/zlib-1.2.11/
+PCRE_UNPACK_DIR:=$(PCRE_DIR)/pcre-8.44/
+OPENSSL_UNPACK_DIR:=$(OPENSSL_DIR)/openssl-1.1.1j/
+
+NGINX_DIR:=$(OSDRV_DIR)/tools/board/nginx-1.18.0/
 
 TOOLCHAIN_FILE:= $(shell which $(OSDRV_CROSS)-gcc )
 TOOLCHAIN_DIR:=$(shell dirname $(shell dirname $(TOOLCHAIN_FILE)))
@@ -92,7 +104,7 @@ RUNTIMELIB_DIR=$(shell dirname $(TOOLCHAIN_DIR))/$(OSDRV_CROSS)/$(RUNTIME_LIB)
 ifeq ($(CROSS_SPECIFIED),y)
 all: prepare hiboot hikernel hirootfs_prepare hibusybox hipctools hiboardtools hirootfs_build
 
-clean: u-boot_clean kernel_clean boardtools_clean pctools_clean busybox_clean rootfs_clean  pub_clean
+clean: u-boot_clean kernel_clean pctools_clean busybox_clean rootfs_clean  pub_clean boardtools_clean
 endif
 
 a:=$(shell $(OSDRV_CROSS)-gcc --version)
@@ -301,20 +313,31 @@ pctools_clean:
 boardtools:
 	@echo "---------task [6] build tools which run on board "
 	make -C $(OSDRV_DIR)/tools/board/e2fsprogs
-	cp -af $(OSDRV_DIR)/tools/board/e2fsprogs/bin/* $(OSDRV_DIR)/pub/$(PUB_APPFS)/tools
+	cp -af $(OSDRV_DIR)/tools/board/e2fsprogs/bin/* $(OSDRV_DIR)/pub/$(PUB_APPFS)/sbin
 	#tar xf $(PACKAGE_GDB) -C $(OSDRV_DIR)/tools/board/gdb/
 	#pushd $(OSDRV_DIR)/tools/board/gdb/$(GDB_VER);patch -p1 < ../$(GDB_PATCH);popd
 	#find $(OSDRV_DIR)/tools/board/gdb/$(GDB_VER) | xargs touch
 	#make -C $(OSDRV_DIR)/tools/board/gdb
-	#cp $(OSDRV_DIR)/tools/board/gdb/gdb-$(OSDRV_CROSS) $(OSDRV_DIR)/pub/$(PUB_APPFS)/tools
+	#cp $(OSDRV_DIR)/tools/board/gdb/gdb-$(OSDRV_CROSS) $(OSDRV_DIR)/pub/$(PUB_APPFS)/sbin
 	make -C $(OSDRV_DIR)/tools/board/mtd-utils/
-	cp $(OSDRV_DIR)/tools/board/mtd-utils/bin/* $(OSDRV_DIR)/pub/$(PUB_APPFS)/tools
-
+	cp $(OSDRV_DIR)/tools/board/mtd-utils/bin/* $(OSDRV_DIR)/pub/$(PUB_APPFS)/sbin
+	
+	pushd $(ZLIB_DIR);tar zxf $(ZLIB_TAR) ;popd
+	pushd $(PCRE_DIR);tar zxf $(PCRE_TAR) ;popd
+	pushd $(OPENSSL_DIR);tar zxf $(OPENSSL_TAR) ;popd
+	pushd $(NGINX_DIR);sh buildcfg.sh ;popd
+	make -C $(NGINX_DIR) -j 16
+	make -C $(NGINX_DIR) install
+	
 boardtools_clean:
 	make -C $(OSDRV_DIR)/tools/board/e2fsprogs distclean
 	#make -C $(OSDRV_DIR)/tools/board/gdb distclean
 	make -C $(OSDRV_DIR)/tools/board/mtd-utils distclean
-
+	rm -rf  $(ZLIB_UNPACK_DIR)
+	rm -rf  $(PCRE_UNPACK_DIR)
+	rm -rf  $(OPENSSL_UNPACK_DIR)
+	make -C $(NGINX_DIR) clean
+	
 ##########################################################################################
 #task [7]	build rootfs
 ##########################################################################################
@@ -330,7 +353,7 @@ app_prepare:prepare
 	chmod +x $(OSDRV_DIR)/pub/$(PUB_IMAGE)/mkubiimg.sh
 
 app:app_clean app_prepare pctools boardtools kernel_modules
-	#$(OSDRV_CROSS)-strip $(OSDRV_DIR)/pub/$(PUB_APPFS)/tools/* >/dev/null;
+	#$(OSDRV_CROSS)-strip $(OSDRV_DIR)/pub/$(PUB_APPFS)/sbin/* >/dev/null;
 	#$(OSDRV_CROSS)-strip $(OSDRV_DIR)/pub/$(PUB_APPFS)/bin/* >/dev/null;
 	#$(OSDRV_CROSS)-strip $(OSDRV_DIR)/pub/$(PUB_APPFS)/lib/* >/dev/null;
 	# build the pagesize = 2k, blocksize = 128k, part_size = 254336KB #
