@@ -1,6 +1,6 @@
 #! /bin/sh
 
-./configure --prefix=../../../pub/bin/board/nginx --with-http_ssl_module --with-openssl=/home/openssl-1.0.2s \
+./configure --prefix=../../../pub/bin/board/nginx --with-http_ssl_module  \
 --with-cc=arm-linux-gcc \
 --with-cpp=arm-linux-g++ \
 --with-pcre=../pcre/pcre-8.44 --with-zlib=../zlib/zlib-1.2.11 --with-openssl=../openssl/openssl-1.1.1j \

@@ -6,6 +6,7 @@ export OSDRV_CROSS=arm-linux
 export CHIP?=s3c2440
 export ARCH=arm
 export CROSS_COMPILE=$(OSDRV_CROSS)-
+CROSS_COMPILE_STRIP:=$(OSDRV_CROSS)-strip
 export OSDRV_CROSS_CFLAGS
 MP_TYPE=sigle
 BOOT_MEDIA?=spi
@@ -55,6 +56,7 @@ PUB_ROOTFS:=rootfs_basic
 
 APP_FS_TAR:=app.tar.gz
 PUB_APPFS:=app
+PUB_APP_DIR:=$(OSDRV_DIR)/pub/$(PUB_APPFS)/
 
 EXT4_TOOL:=make_ext4fs
 EXT4_IMAGE_BIN:=rootfs_$(CHIP)_96M.ext4
@@ -94,6 +96,8 @@ PCRE_UNPACK_DIR:=$(PCRE_DIR)/pcre-8.44/
 OPENSSL_UNPACK_DIR:=$(OPENSSL_DIR)/openssl-1.1.1j/
 
 NGINX_DIR:=$(OSDRV_DIR)/tools/board/nginx-1.18.0/
+
+NGINX_TARGET_DIR:=$(OSDRV_DIR)/pub/bin/$(PUB_BOARD)/nginx
 
 TOOLCHAIN_FILE:= $(shell which $(OSDRV_CROSS)-gcc )
 TOOLCHAIN_DIR:=$(shell dirname $(shell dirname $(TOOLCHAIN_FILE)))
@@ -220,28 +224,6 @@ kernel_savecfg:
 kernel_modules:prepare 
 	pushd $(KERNEL_DIR)/;make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)-  modules -j 16;popd
 	
-	#EXT4
-	cp $(KERNEL_DIR)/fs/mbcache.ko   $(KO_TARGET_DIR)/
-	cp $(KERNEL_DIR)/fs/jbd2/jbd2.ko $(KO_TARGET_DIR)/
-	cp $(KERNEL_DIR)/fs/ext4/ext4.ko $(KO_TARGET_DIR)/
-	#cp $(KERNEL_DIR)/lib/crc16.ko    $(KO_TARGET_DIR)/
-	
-	#NFS
-	cp $(KERNEL_DIR)/fs/lockd/lockd.ko                         $(KO_TARGET_DIR)/
-	cp $(KERNEL_DIR)/crypto/cbc.ko                             $(KO_TARGET_DIR)/
-	cp $(KERNEL_DIR)/fs/nfs/nfs.ko                             $(KO_TARGET_DIR)/
-	cp $(KERNEL_DIR)/net/sunrpc/sunrpc.ko                      $(KO_TARGET_DIR)/
-	cp $(KERNEL_DIR)/crypto/md5.ko                             $(KO_TARGET_DIR)/
-	cp $(KERNEL_DIR)/net/sunrpc/auth_gss/rpcsec_gss_krb5.ko    $(KO_TARGET_DIR)/
-	cp $(KERNEL_DIR)/fs/nfs_common/nfs_acl.ko                  $(KO_TARGET_DIR)/
-	cp $(KERNEL_DIR)/crypto/des_generic.ko                     $(KO_TARGET_DIR)/
-	cp $(KERNEL_DIR)/net/sunrpc/auth_gss/auth_rpcgss.ko        $(KO_TARGET_DIR)/
-
-	#mmc
-	cp $(KERNEL_DIR)/drivers/mmc/card/mmc_block.ko   $(KO_TARGET_DIR)/
-	cp $(KERNEL_DIR)/drivers/mmc/core/mmc_core.ko    $(KO_TARGET_DIR)/
-	cp $(KERNEL_DIR)/drivers/mmc/host/s3cmci.ko      $(KO_TARGET_DIR)/
-	
 kernel_clean:
 	rm $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(UIMAGE) -rf
 	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- distclean
@@ -313,14 +295,12 @@ pctools_clean:
 boardtools:
 	@echo "---------task [6] build tools which run on board "
 	make -C $(OSDRV_DIR)/tools/board/e2fsprogs
-	cp -af $(OSDRV_DIR)/tools/board/e2fsprogs/bin/* $(OSDRV_DIR)/pub/$(PUB_APPFS)/sbin
 	#tar xf $(PACKAGE_GDB) -C $(OSDRV_DIR)/tools/board/gdb/
 	#pushd $(OSDRV_DIR)/tools/board/gdb/$(GDB_VER);patch -p1 < ../$(GDB_PATCH);popd
 	#find $(OSDRV_DIR)/tools/board/gdb/$(GDB_VER) | xargs touch
 	#make -C $(OSDRV_DIR)/tools/board/gdb
 	#cp $(OSDRV_DIR)/tools/board/gdb/gdb-$(OSDRV_CROSS) $(OSDRV_DIR)/pub/$(PUB_APPFS)/sbin
 	make -C $(OSDRV_DIR)/tools/board/mtd-utils/
-	cp $(OSDRV_DIR)/tools/board/mtd-utils/bin/* $(OSDRV_DIR)/pub/$(PUB_APPFS)/sbin
 	
 	pushd $(ZLIB_DIR);tar zxf $(ZLIB_TAR) ;popd
 	pushd $(PCRE_DIR);tar zxf $(PCRE_TAR) ;popd
@@ -353,6 +333,41 @@ app_prepare:prepare
 	chmod +x $(OSDRV_DIR)/pub/$(PUB_IMAGE)/mkubiimg.sh
 
 app:app_clean app_prepare pctools boardtools kernel_modules
+
+	cp -af $(OSDRV_DIR)/tools/board/e2fsprogs/bin/* $(PUB_APP_DIR)/sbin
+	cp -af $(OSDRV_DIR)/tools/board/mtd-utils/bin/* $(PUB_APP_DIR)/sbin
+	cp -rf $(NGINX_TARGET_DIR) $(PUB_APP_DIR)/opt/
+	rm $(PUB_APP_DIR)/sbin/flash_eraseall
+	mv $(PUB_APP_DIR)/sbin/update-usbids.sh /tmp
+	mv $(PUB_APP_DIR)/sbin/shutdown /tmp
+	$(CROSS_COMPILE_STRIP) $(PUB_APP_DIR)/sbin/*
+	cp -af $(OSDRV_DIR)/tools/board/mtd-utils/bin/flash_eraseall $(PUB_APP_DIR)/sbin
+	cp -af /tmp/update-usbids.sh $(PUB_APP_DIR)/sbin
+	cp -af /tmp/shutdown $(PUB_APP_DIR)/sbin
+	$(CROSS_COMPILE_STRIP) $(PUB_APP_DIR)/opt/nginx/sbin/*
+	
+	#EXT4
+	cp $(KERNEL_DIR)/fs/mbcache.ko   $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/fs/jbd2/jbd2.ko $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/fs/ext4/ext4.ko $(KO_TARGET_DIR)/
+	#cp $(KERNEL_DIR)/lib/crc16.ko    $(KO_TARGET_DIR)/
+	
+	#NFS
+	cp $(KERNEL_DIR)/fs/lockd/lockd.ko                         $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/crypto/cbc.ko                             $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/fs/nfs/nfs.ko                             $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/net/sunrpc/sunrpc.ko                      $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/crypto/md5.ko                             $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/net/sunrpc/auth_gss/rpcsec_gss_krb5.ko    $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/fs/nfs_common/nfs_acl.ko                  $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/crypto/des_generic.ko                     $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/net/sunrpc/auth_gss/auth_rpcgss.ko        $(KO_TARGET_DIR)/
+
+	#mmc
+	cp $(KERNEL_DIR)/drivers/mmc/card/mmc_block.ko   $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/drivers/mmc/core/mmc_core.ko    $(KO_TARGET_DIR)/
+	cp $(KERNEL_DIR)/drivers/mmc/host/s3cmci.ko      $(KO_TARGET_DIR)/
+
 	#$(OSDRV_CROSS)-strip $(OSDRV_DIR)/pub/$(PUB_APPFS)/sbin/* >/dev/null;
 	#$(OSDRV_CROSS)-strip $(OSDRV_DIR)/pub/$(PUB_APPFS)/bin/* >/dev/null;
 	#$(OSDRV_CROSS)-strip $(OSDRV_DIR)/pub/$(PUB_APPFS)/lib/* >/dev/null;
