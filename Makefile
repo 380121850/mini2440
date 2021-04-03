@@ -16,6 +16,7 @@ PUB_BIN_BOARD_DIR=$(OSDRV_DIR)/pub/bin/$(PUB_BOARD)
 PUB_BIN_PC_DIR=$(OSDRV_DIR)/pub/bin/pc
 PUB_IMAGE_DIR=$(OSDRV_DIR)/pub/$(CHIP)_$(BOOT_MEDIA)_image_$(LIB_TYPE)
 
+
 ifneq ($(BOOT_MEDIA),spi)
 $(error you must set valid BOOT_MEDIA:spi!)
 endif
@@ -53,6 +54,7 @@ KERNEL_CFG:=config_mini2440_x35
 KERNEL_DIR=$(OSDRV_DIR)/$(KERNEL_VER)
 KO_TARGET_DIR=$(OSDRV_DIR)/pub/app/
 
+PUB_KERNEL_TARGET_DIR=$(KERNEL_DIR)/build_$(CHIP)
 
 
 ROOT_FS_TAR:=rootfs_basic.tar.gz
@@ -129,6 +131,7 @@ prepare:
 	mkdir $(PUB_BIN_PC_DIR) -p
 	mkdir $(PUB_IMAGE_DIR) -p
 	mkdir $(NGINX_TARGET_DIR) -p
+	mkdir $(PUB_KERNEL_TARGET_DIR)  -p
 
 ##########################################################################################
 #task [1]	build uboot
@@ -208,31 +211,30 @@ endif
 ##########################################################################################
 #task [2]	build kernel
 ##########################################################################################
-kernel: 
+kernel: prepare
 	@echo "---------task [2] build kernel"
 	cp $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG) $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/configs/$(KERNEL_CFG)_defconfig
-	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- $(KERNEL_CFG)_defconfig
-	pushd $(OSDRV_DIR)/$(KERNEL_VER);\
-	make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- uImage -j 16 >/dev/null;popd
-	cp $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/boot/uImage $(PUB_IMAGE_DIR)/$(UIMAGE)
+	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)-  $(KERNEL_CFG)_defconfig
+	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)-  uImage -j 16 
+	cp $(PUB_KERNEL_TARGET_DIR)/arch/arm/boot/uImage $(PUB_IMAGE_DIR)/$(UIMAGE)
 
 kernel_menuconfig:
 	cp $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG) $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/configs/$(KERNEL_CFG)_defconfig
-	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- $(KERNEL_CFG)_defconfig
-	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- menuconfig
+	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)-  $(KERNEL_CFG)_defconfig
+	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)-  menuconfig
 
 kernel_savecfg:
-	pushd $(OSDRV_DIR)/$(KERNEL_VER);\
-	cp .config $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG);popd
+	cp $(OSDRV_DIR)/$(KERNEL_VER)/.config $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG);
 
 kernel_modules: 
-	pushd $(KERNEL_DIR)/;make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)-  modules -j 16;popd
+	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- modules -j 16
 	
 kernel_clean:
 	rm $(PUB_IMAGE_DIR)/$(UIMAGE) -rf
 	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- distclean
 	rm $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/configs/$(KERNEL_CFG)_defconfig -rf
-
+	rm $(PUB_KERNEL_TARGET_DIR) -rf
+	
 ##########################################################################################
 #task [3]	prepare rootfs
 ##########################################################################################
@@ -352,7 +354,7 @@ app:app_clean app_prepare pctools boardtools kernel_modules
 	cp -af /tmp/shutdown $(PUB_APP_DIR)/sbin
 	$(CROSS_COMPILE_STRIP) $(PUB_APP_DIR)/opt/nginx/sbin/*
 	
-	pushd $(KERNEL_DIR)/;make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)-  modules_install INSTALL_MOD_PATH=$(KO_TARGET_DIR);popd
+	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- O=$(PUB_KERNEL_TARGET_DIR) modules_install INSTALL_MOD_PATH=$(KO_TARGET_DIR)
 	#EXT4
 	#cp $(KERNEL_DIR)/fs/mbcache.ko   $(KO_TARGET_DIR)/
 	#cp $(KERNEL_DIR)/fs/jbd2/jbd2.ko $(KO_TARGET_DIR)/
