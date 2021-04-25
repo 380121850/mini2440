@@ -54,7 +54,7 @@ KERNEL_CFG:=config_mini2440_x35
 KERNEL_DIR=$(OSDRV_DIR)/$(KERNEL_VER)
 KO_TARGET_DIR=$(OSDRV_DIR)/pub/app/
 
-PUB_KERNEL_TARGET_DIR=$(KERNEL_DIR)/build_$(CHIP)
+PUB_KERNEL_TARGET_DIR=$(PUB_BIN_BOARD_DIR)/build_$(CHIP)_$(KERNEL_VER)
 
 
 ROOT_FS_TAR:=rootfs_basic.tar.gz
@@ -213,25 +213,26 @@ endif
 ##########################################################################################
 kernel: prepare
 	@echo "---------task [2] build kernel"
-	cp $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG) $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/configs/$(KERNEL_CFG)_defconfig
-	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)-  $(KERNEL_CFG)_defconfig
-	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)-  uImage -j 16 
+	cp $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG) $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/configs/$(KERNEL_CFG)_defconfig 
+	cp $(OSDRV_DIR)/$(KERNEL_VER)/rootfs-initramfs.cfg $(PUB_KERNEL_TARGET_DIR)/
+	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- O=$(PUB_KERNEL_TARGET_DIR)  $(KERNEL_CFG)_defconfig
+	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- O=$(PUB_KERNEL_TARGET_DIR)  uImage -j 16 
 	cp $(PUB_KERNEL_TARGET_DIR)/arch/arm/boot/uImage $(PUB_IMAGE_DIR)/$(UIMAGE)
 
 kernel_menuconfig:
 	cp $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG) $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/configs/$(KERNEL_CFG)_defconfig
-	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)-  $(KERNEL_CFG)_defconfig
-	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)-  menuconfig
+	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- O=$(PUB_KERNEL_TARGET_DIR) $(KERNEL_CFG)_defconfig
+	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- O=$(PUB_KERNEL_TARGET_DIR)  menuconfig
 
 kernel_savecfg:
-	cp $(OSDRV_DIR)/$(KERNEL_VER)/.config $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG);
+	cp $(PUB_KERNEL_TARGET_DIR)/.config $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG);
 
 kernel_modules: 
-	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- modules -j 16
+	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- O=$(PUB_KERNEL_TARGET_DIR) modules -j 16
 	
 kernel_clean:
 	rm $(PUB_IMAGE_DIR)/$(UIMAGE) -rf
-	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- distclean
+	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- O=$(PUB_KERNEL_TARGET_DIR) distclean
 	rm $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/configs/$(KERNEL_CFG)_defconfig -rf
 	rm $(PUB_KERNEL_TARGET_DIR) -rf
 	
@@ -241,7 +242,8 @@ kernel_clean:
 rootfs_prepare: prepare busybox
 	@echo "---------task [3] prepare rootfs "
 	tar xzf $(OSDRV_DIR)/rootfs/$(ROOT_FS_TAR) -C $(OSDRV_DIR)/pub
-	cp -af $(OSDRV_DIR)/$(BUSYBOX_VER)/_install/* $(OSDRV_DIR)/pub/$(PUB_ROOTFS)
+	#cp -af $(OSDRV_DIR)/$(BUSYBOX_VER)/_install/ $(OSDRV_DIR)/pub/$(PUB_ROOTFS)
+	cp -af $(OSDRV_DIR)/$(BUSYBOX_VER)/busybox $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/bin/
 
 rootfs_dev: prepare
 	@echo "---------task [4] prepare rootfs "
@@ -254,7 +256,7 @@ busybox:
 	@echo "---------task [4] build busybox "
 	cp $(OSDRV_DIR)/$(BUSYBOX_VER)/$(BUSYBOX_CFG) $(OSDRV_DIR)/$(BUSYBOX_VER)/.config
 	pushd $(OSDRV_DIR)/$(BUSYBOX_VER)/;make -j 16 >/dev/null;popd
-	make -C $(OSDRV_DIR)/$(BUSYBOX_VER) install
+	#make -C $(OSDRV_DIR)/$(BUSYBOX_VER) install
 
 busybox_clean:
 	make -C $(OSDRV_DIR)/$(BUSYBOX_VER) distclean
