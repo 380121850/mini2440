@@ -113,12 +113,9 @@ RUNTIMELIB_DIR=$(shell dirname $(TOOLCHAIN_DIR))/$(OSDRV_CROSS)/$(RUNTIME_LIB)
 ##########################################################################################
 #	set task
 ##########################################################################################
-ifeq ($(CROSS_SPECIFIED),y)
-all: prepare hiboot hikernel hirootfs_prepare hibusybox hipctools hiboardtools hirootfs_build
+all: prepare boot kernel app
 
-clean: u-boot_clean kernel_clean pctools_clean busybox_clean  pub_clean boardtools_clean
-		rm -rf $(OSDRV_DIR)/pub/
-endif
+clean: u-boot_clean busybox_clean kernel_clean pctools_clean boardtools_clean pub_clean
 
 a:=$(shell $(OSDRV_CROSS)-gcc --version)
 b:=$(findstring $(TOOLCHAINI_VERSION),$(a))
@@ -211,7 +208,7 @@ endif
 ##########################################################################################
 #task [2]	build kernel
 ##########################################################################################
-kernel: prepare
+kernel: prepare rootfs_prepare
 	@echo "---------task [2] build kernel"
 	cp $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG) $(OSDRV_DIR)/$(KERNEL_VER)/arch/arm/configs/$(KERNEL_CFG)_defconfig 
 	cp $(OSDRV_DIR)/$(KERNEL_VER)/rootfs-initramfs.cfg $(PUB_KERNEL_TARGET_DIR)/
@@ -227,7 +224,7 @@ kernel_menuconfig:
 kernel_savecfg:
 	cp $(PUB_KERNEL_TARGET_DIR)/.config $(OSDRV_DIR)/$(KERNEL_VER)/$(KERNEL_CFG);
 
-kernel_modules: 
+kernel_modules: kernel
 	make -C $(OSDRV_DIR)/$(KERNEL_VER) ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- O=$(PUB_KERNEL_TARGET_DIR) modules -j 16
 	
 kernel_clean:
@@ -245,9 +242,9 @@ rootfs_prepare: prepare busybox
 	#cp -af $(OSDRV_DIR)/$(BUSYBOX_VER)/_install/ $(OSDRV_DIR)/pub/$(PUB_ROOTFS)
 	cp -af $(OSDRV_DIR)/$(BUSYBOX_VER)/busybox $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/bin/
 
-rootfs_dev: prepare
-	@echo "---------task [4] prepare rootfs "
-	mknod $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/dev/console c 5 1
+#rootfs_dev: prepare
+#	@echo "---------task [4] prepare rootfs "
+#	mknod $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/dev/console c 5 1
 
 ##########################################################################################
 #task [4]	build busybox
