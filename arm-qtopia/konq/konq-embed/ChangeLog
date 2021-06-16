@@ -1,0 +1,203 @@
+2003-07-04  Simon Hausmann <hausmann@kde.org>
+
+    * New snapshot, pull in referrer fix from 2.2 kdelibs branch.
+
+2003-05-26  Paul Chitescu  <paulc-devel@null.ro>
+
+    * Fixed a bug in the dialer
+
+    * Fixed and improved i18n capabilities
+
+2003-05-22  Paul Chitescu  <paulc-devel@null.ro>
+
+    * Javascript URLs can be entered in the location bar and bookmarked
+
+    * Flash can call Javascript in the hosting browser (this feature is
+      disabled by default)
+
+    * Javascript play() support in SimpleSound can be turned off from
+      the config file
+
+2003-05-16  Simon Hausmann <hausmann@kde.org>
+
+    * Another snapshot, for a crash fix Paul comitted.
+
+2003-05-14  Simon Hausmann <hausmann@kde.org>
+
+    * New snapshot, to get in latest ssl fixlet from kdelibs
+
+2003-05-05  Paul Chitescu  <paulc-devel@null.ro>
+
+    * Moved everything related to the debug key to its own file
+
+    * Added an AutoReopenURL to be open when the last view is closed;
+      fixed bugs exposed by this new feature
+
+2002-12-02  Paul Chitescu  <paulc-devel@null.ro>
+
+    * Added Javascript extension capability to embedded objects
+
+    * Added SSL certificate info to dialog and fixed the SSL caching
+
+2002-11-26  Paul Chitescu  <paulc-devel@null.ro>
+
+    * Added a XML described User Interface, --enable-xmlui
+
+    * Removed --enable-localbar and --enable-launchpanel made obsolete by
+      the more general XML UI and the SpecialURLs
+
+    * Added proper Read/Write parts with kplaintext add-on as example
+
+    * Views are capable of hosting ReadOnly parts or their derivatives, not
+      only HTML browsers
+
+    * Added capability to implement Javascript extensions; the sample
+      jsdebug adds a DebugOut global function
+
+    * Much more complete popup menu, knows about links, frames, images
+
+    * Countless other changes
+
+2002-11-17  Simon Hausmann <hausmann@kde.org>
+
+    * Adjusted ftp support to re-use the original ftp sources unmodified,
+      through inheritance
+
+2002-09-30  Paul Chitescu  <paulc-devel@null.ro>
+
+    * New configuration option --enable-sortdir to change the directory
+      listing order. Directories are always first and bolded.
+
+    * Made local protocols able to override default ones
+
+2002-08-01  Paul Chitescu  <paulc-devel@null.ro>
+
+    * Improved add-on support
+
+    * Added a KFlashPart based on the open-source Flash Library for Linux
+      ( see http://www.swift-tools.com/Flash for more details )
+
+2002-07-17  Paul Chitescu  <paulc-devel@null.ro>
+
+    * Added support for add-ons, working on first one (flash).
+
+    * Made it build with automake 1.6.
+
+    * Fixed some warnings exposed by same automake.
+
+2002-07-01  Paul Chitescu  <paulc-devel@null.ro>
+
+    * Fixed TARGET="_blank" which created an extra empty view.
+
+    * Added guessing MIME types by file extension.
+
+    * More general launch panel support, added help function.
+
+    * Added a Qt launcher to address mouse slugginess when Konq/E is the
+      QWS server process.
+
+2002-06-27  Paul Chitescu  <paulc-devel@null.ro>
+
+    * Improved MIME handling - now includes embedded objects.
+
+    * Added support for registering KParts as MIME handlers.
+
+    * Added large toolbar icons (configurable at compile time).
+
+    * Added KONQ_EMBEDDED define which is always 1 when building Konq/E
+      undefined in normal KDE builds.
+
+2002-06-24  Paul Chitescu  <paulc-devel@null.ro>
+
+    * Added MIME type transfer to TransferJob.
+
+    * Added optional local CGI support, made FTP also optional.
+
+    * Added *very* basic URL redirection.
+
+    * Added start button for those using Konq/E as application launcher.
+
+2002-03-11  Simon Hausmann  <hausmann@kde.org>
+
+    * Fixed major braindamage/bug in config file parsing when loading
+      multiple config files.
+
+    * Reworked appearance tab in the preferencs dialog.
+
+    * Enabled document scaling in the GUI.
+
+2002-02-19  Simon Hausmann  <hausmann@kde.org>
+
+    * Implemented autoloading of images.
+
+    * Added add-on patch for khtml document scaling. Work in progress.
+
+    * Ipkg tweaks (preinst script to clean up files from old b0rked ipkg)
+
+2002-02-13  Simon Hausmann  <hausmann@kde.org>
+
+    * don't build the javascript plugin as separate ipkg anymore.
+      It just doesn't pay off but instead just makes things a lot
+      bigger.
+
+2002-02-12  Simon Hausmann  <hausmann@kde.org>
+
+    * configure.in.in: abort for unknown --with-gui arguments
+
+    * main.cc: use sigaction and SA_RESTART to fix zombies on
+      *BSD
+
+    * kssl/Makefile.am: fix braindamage. Thanks to Michael Matz.
+
+    * further Makefile.am cleanups and preparations.
+
+    * fixed ipkg creation
+
+2002-02-03  Simon Hausmann  <hausmann@kde.org>
+
+    * kjs_html.la: don't link against libkhtml.la , otherwise
+      it will get included in the DSO as copy when linking the
+      javascript module as plugin
+
+    * improved mkipkg to handle srcdir!=builddir, to handle
+      prefix expansion on control files, to support inclusion
+      and exclusion masks
+
+    * added control file for javascript plugin
+
+    * patch by Markus Gritsch <gritsch@iue.tuwien.ac.at> to 
+      save/restore the location bar status (shown/hidden) and
+      to show 'Konqueror' instead of an empty caption
+
+2002-02-01  Simon Hausmann  <hausmann@kde.org>
+
+    * konqe-build: minor fix to transform _ into - in the version
+      name for the snapshot tarball
+
+    * A bunch of fixes to make it compile on FreeBSD/OpenBSD
+
+    * Fixed enabling/disabling of javascript in the preferences
+      dialog
+
+    * The Javascript implementation can now be compiled as separate
+      dynamically loadable module
+
+2002-01-31  Simon Hausmann  <hausmann@kde.org>
+
+    * mainwindow_qpe.cc: Use QToolBar instead of QPEToolBar, as the
+      latter is deprecated.
+
+2002-01-27  Simon Hausmann  <hausmann@kde.org>
+
+    * New Snapshot. Mostly to fix the libpng trouble that the
+      last ipkg caused, for the Z people.
+
+2002-01-20  Simon Hausmann  <hausmann@kde.org>
+
+    * Started ChangeLog, as requested on the mailinglist.
+
+    * Patches by Paul Chitescu <pchitescu@pchitescu.myip.org> :
+      -  get untrusted -> trusted messagebox working 
+      -  a small KDebug fixlet
+
+// vim: et sw=4

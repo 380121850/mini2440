@@ -1,0 +1,252 @@
+#!/bin/sh
+# $Id: mkipkg,v 1.9.2.5 2002/12/18 17:01:02 hausmann Exp $
+# vim: et sw=4
+
+# TODO: srcdir!=builddir
+
+usage()
+{
+    echo "usage: $0 --destdir=[destination installation directory] --control=[path to control.in]"
+    exit 1
+}
+
+destdir=
+strip=strip
+control=
+builddir=
+srcdir=
+prefix=
+preinst=
+postinst=
+prerm=
+postrm=
+mkfsjffs2=
+ipkgbuild=ipkg-build
+buildversion=
+
+oldpwd=
+
+for option
+do
+    case "$option" in
+        -*=*)
+            arg=`echo "$option" | sed 's/[-_a-zA-Z0-9]*=//'`
+            ;;
+    esac
+
+    case "$option" in
+        --destdir=*)
+            destdir=$arg
+            ;;
+        --strip=*)
+            strip=$arg
+            ;;
+       --control=*)
+            control=$arg
+            ;;
+       --preinst=*)
+            preinst=$arg
+            ;;
+       --postinst=*)
+            postinst=$arg
+            ;;
+       --prerm=*)
+            prerm=$arg
+            ;;
+       --postrm=*)
+            postrm=$arg
+            ;;
+       --builddir=*)
+            builddir=$arg
+            ;;
+       --srcdir=*)
+            srcdir=$arg
+            ;;
+       --prefix=*)
+            prefix=$arg
+            ;;
+       --mkjffs2=*)
+            mkfsjffs2=$arg
+            ;;
+       --ipkgbuild=*)
+            ipkgbuild=$arg
+            ;;
+       --buildversion=*)
+            buildversion=$arg
+            ;;
+    esac
+done
+
+# remove leading slash from prefix (to fix globbing)
+if [ -n "$prefix" ]; then
+    prefix=`echo $prefix | sed -e "s,/\(.*\),\\1,"`
+fi
+
+if [ -z "$destdir" -o -z "$control" ]; then
+    usage
+fi
+
+if [ ! -r $builddir/konq-embedrc ]; then
+    echo "$0: cannot find $builddir/konq-embedrc, exiting..."
+    exit 1
+fi
+
+if [ ! -r $control ]; then
+   echo "$0: cannot find $control, exiting..."
+   exit 1
+fi
+
+findFile()
+{
+    local path=
+    if [ $# = 1 ]; then
+        find $1 -type f -o -type b -o -type c -o -type l 
+    else
+        find . -type f -o -type b -o -type c -o -type l | \
+	sed -e "s,\./\(.*\),\\1,g"
+    fi
+
+}
+
+_pushd() { oldpwd=`pwd`; cd $1; }
+_popd() { cd $oldpwd; }
+
+setVar()
+{
+    eval "$1='$2'"
+}
+
+expandMaskToList()
+{
+    local _list=`echo $1`
+    local _tmpFileList=
+    for f in $_list; do
+        if [ -d $f ]; then
+            f=`$findFile $f`
+        fi
+        _tmpFileList=$f" $_tmpFileList"
+    done
+    setVar $2 "$_tmpFileList"
+}
+
+createFileList()
+{
+    local excludeMask=$(eval echo '"'$(sed -n -e "s,^FileExcludeMask: *,,p" $1)'"')
+    local includeMask=$(eval echo '"'$(sed -n -e "s,^FileIncludeMask: *,,p" $1)'"')
+
+    if [ -n "$includeMask" ]; then
+        _pushd $destdir
+        expandMaskToList "$includeMask" _fileList
+	_popd
+    else
+        _fileList=`cd $destdir && findFile`
+    fi
+
+    _excludeList=
+    if [ -n "$excludeMask" ]; then
+        _pushd $destdir
+        expandMaskToList "$excludeMask" _excludeList
+        _popd
+    fi
+
+    local realFileList=
+    for file in $_fileList; do
+        local containedInList=0
+        for i in $_excludeList; do
+            if [ $file = $i ]; then
+                containedInList=1
+            fi
+        done
+        if [ $containedInList = 0 ]; then
+            realFileList=$file" $realFileList"
+        fi
+    done
+
+    setVar $2 "$realFileList"
+}
+
+stripFiles()
+{
+    for f in $1; do
+        if [ -x $f ]; then
+	    $strip --strip-all $f
+	fi
+    done
+}
+
+installScript()
+{
+    if [ -n "$1" -a -f "$1" ]; then
+        destfile=`basename $1`
+        echo "installing $destfile"
+        sed -f subst < $1 > $ctrldir/$destfile
+        chmod +x $ctrldir/$destfile
+    fi
+}
+
+tempDir=/tmp/`basename $0`.$$
+mkdir -p $tempDir
+if [ $? != 0 ]; then
+    echo "$0: cannot create $tempDir, exiting..."
+    exit 1
+fi
+
+createFileList $control ipkgFileList
+
+( cd $destdir && tar cf - $ipkgFileList ) | \
+( cd $tempDir && tar xf - )
+
+( cd $tempDir && stripFiles "$ipkgFileList" )
+
+#buildsize=`du -h -s $destdir | awk '{print $1}'`
+
+path="`echo "$PATH" | sed -e "s/\:/ /g"`"
+if [ -z "$mkfsjffs2" ]; then
+    for i in $path; do
+      if [ -x "$i/mkfs.jffs2" ]; then
+        mkfsjffs2="$i/mkfs.jffs2"
+        break
+      fi
+    done
+fi
+
+if [ -z "$mkfsjffs2" ]; then
+    echo "$0: WARNING: no mkjfs.jffs2 found in path. Falling back to using du"
+    echo "for size calculation. mkfs.jffs2 is recommended for size calculation"
+    echo "as it calculates the real package size on the compressed file system,"
+    echo "in contrast to du calculating the uncompressed size!"
+    buildsize=`du -h -s $tempDir | awk '{print $1}'`
+else
+    buildsize=`$mkfsjffs2 -r $tempDir | wc -c`
+fi
+
+echo "*** package size: $buildsize"
+
+if [ -z "$buildversion" ]; then
+    buildversion=`cat $srcdir/../VERSION`
+fi
+
+ctrldir=$tempDir/CONTROL
+
+mkdir -p $ctrldir
+
+cat > subst << EOT
+s,@konq_ipkg_version@,$buildversion,g
+s,@konq_ipkg_size@,$buildsize,g
+s,@konq_ipkg_arch@,arm,g
+EOT
+
+sed -f subst < $control | egrep -v '^(FileIncludeMask|FileExcludeMask):' > $ctrldir/control
+
+installScript $preinst
+installScript $postinst
+installScript $prerm
+installScript $posrm
+
+rm -f subst
+
+echo "*** building package (ipkg-build)"
+$ipkgbuild $tempDir
+
+rm -rf $tempDir
+

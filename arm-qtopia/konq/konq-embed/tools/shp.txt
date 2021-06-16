@@ -1,0 +1,123 @@
+                     SHP - A Shell+HTML Preprocessor
+                     ===============================
+
+
+    SHP is a very small HTML preprocessor aimed at embedding Bourne shell or
+compatible scripts in CGI-parsed pages. Although PHP does a much better job it
+is way too large for most embedded systems.
+
+    The shell used is required to support the unquoted here-document syntax.
+
+
+Command line
+============
+
+    shp [-c|-e] [-s shell] [-f file]
+
+    The -c options activates the Compile mode. The preprocessor only generates
+text output but doesn't fork the shell to execute it. As a convenience the
+shell name is prepended to the output in the usual #! comment. The generated
+script can be later executed directly or trough shp -e (which is used to parse
+the query string into decoded separate variables).
+
+    The -e option forces Execute mode which parses query strings to use in
+other CGI scripts. The -s is required to set the name of the script to be
+executed (no fork is done). If a -f option is used the stdin will be redirected
+from that file.
+
+    The -c and -e options are mutually exclusive.
+
+    Use -s to specify the shell to be used or the CGI script to execute. The
+default shell is /bin/sh.
+
+    The -f option redirects the input (which defaults to stdin) from the
+specified file.
+
+
+File syntax
+===========
+
+    The syntax is an extension of the host - which is usually HTML, XML or WML.
+All text not matching the special syntax of the parser will be passed verbatim.
+
+    Large sections of shell code or those that generates no output should be
+surrounded by the <?sh and ?> tags. All such text will be passed directly to
+the shell.
+
+    All text outside the special tags is passed to the output as an unquoted
+here-document. As a result the content is subjected to parameter expansion,
+command substitution, and arithmetic expansion. As a result if you do not want
+expansion you must escape (by using the backslash) the characters:
+    $ - expansion prefix
+    ` - command substitution
+    \ - escape character itself
+
+    Note that all parameters except $0 expand to the empty string due to the
+way the shell is called - without arguments.
+
+
+Environment variables
+=====================
+
+    All the environment variables are inherited by the forked shell or executed
+script. Supplementary, the QUERY_STRING is parsed and for each name=value pair
+a new environment variable PARAM_name is created having the specified value.
+Both variable names and their values are URL-unescaped and ready for use.
+
+
+Comments
+========
+
+    All empty or #-commented lines at the beginning of the file are stripped.
+
+
+Example
+=======
+
+    The following script list the contents of the directory where the script
+is executed. If the script is marked executable then SHP is assumed to be
+installed in /usr/bin
+
+
+#!/usr/bin/shp -f
+
+<?sh
+sedhtml='s/&/\&amp;/g; s/"/\&quot;/g; s/</\&lt;/g; s/>/\&gt;/g; s/ /\&nbsp;/g'
+?>
+Content-Type: text/html
+
+<html>
+<head>
+<title>Directory Listing</title>
+</head>
+<body>
+<h1>`pwd | sed "$sedhtml"`</h1>
+<?sh
+for i in *; do
+    f=`echo "$i" | sed "$sedhtml"`
+    test -d "$i" && f="$f/"
+?>
+<a href="$f">$f</a><br>
+<?sh done ?>
+</body>
+</html>
+
+
+License
+=======
+
+    SHP is Copyright (C) 2002 Paul Chitescu <paulc-devel@null.ro>
+
+    This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software Foundation,
+Inc., 675 Mass Ave, Cambridge, MA 02139, USA.

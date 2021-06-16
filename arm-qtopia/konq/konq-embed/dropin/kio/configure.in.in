@@ -1,0 +1,19 @@
+AC_ARG_ENABLE(ftp,[  --enable-ftp            Enable support for the FTP protocol],
+              want_ftp=$enableval,want_ftp=no)
+if test "x$want_ftp" = "xyes"; then
+    AC_DEFINE(ENABLE_FTP, 1, [If we want support for the FTP protocol])
+    KIO_FTP="libkio_ftp.la"
+    AC_SUBST(KIO_FTP)
+fi
+
+AC_ARG_ENABLE(cgi,[  --enable-cgi            Enable support for CGI implemented protocols],
+              want_cgi=$enableval,want_cgi=no)
+if test "x$want_cgi" = "xyes"; then
+    AC_DEFINE(ENABLE_CGI, 1, [If we support protocols trough local CGI])
+fi
+
+AC_ARG_ENABLE(sortdir,[  --enable-sortdir        Enable sorting directory listings],
+              want_sortdir=$enableval,want_sortdir=no)
+if test "x$want_sortdir" = "xyes"; then
+    AC_DEFINE(SORT_DIRLIST, 1, [If we support sorting directory listings])
+fi

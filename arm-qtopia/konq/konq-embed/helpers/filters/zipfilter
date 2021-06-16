@@ -1,0 +1,65 @@
+#!/bin/sh
+
+# This file is part of the KDE project
+# Copyright (C) 2003 Paul Chitescu <paulc-devel@null.ro>
+# License: Open Source, Use On Your Own Risk
+#
+# Konqueror/Embedded ZIP to HTML data filter
+#
+# Requires: sh, sed, awk, unzip
+#
+# Usage: in your konq-embedrc file,
+#
+# [MIME Handlers]
+# application/zip,.zip=|text/html|/path/to/this/file
+
+# you shouldn't need to change anything below
+display()
+{
+    if [ -n "$file" ]; then
+	case "$FILTER_MIME_OUT" in
+	image/*|audio/*|text/html|text/plain)
+	    unzip -p "$1" "$file" 2>&1
+	    ;;
+	*)
+	    echo -n "<HTML><HEAD><TITLE>zip-file: $file</TITLE></HEAD><BODY><PRE>"
+	    unzip -p "$1" "$file" 2>&1 | sed "$sedhtml"
+	    echo '</PRE></BODY></HTML>'
+	    ;;
+	esac
+	exit 0
+    fi
+    title='zip-list: '`echo -n "$FILTER_URL" | sed "$sedhtml"`
+    echo -n "<HTML><HEAD><TITLE>$title</TITLE></HEAD><BODY>"
+    echo "<PRE><B>$title</B><BR/><HR/>"
+    unzip -Z -1 "$1" | awk '
+{ gsub("\r*$",""); s = $0;
+  gsub("&","\\&amp;",s); gsub("\"","\\&quot;",s);
+  gsub("<","\\&lt;",s); gsub(">","\\&gt;",s);
+}
+  /\/$/ { print s; next; }
+{ printf("<A HREF=\"??%s\">%s</A>\n",s,s); }
+'
+    echo '</PRE></BODY></HTML>'
+}
+
+sedhtml='s/&/\&amp;/g; s/"/\&quot;/g; s/</\&lt;/g; s/>/\&gt;/g'
+case "$FILTER_URL" in
+*\?*)
+    file=`echo "$FILTER_URL" | sed 's,^.*[?],,'`
+    ;;
+*)
+    file=""
+    ;;
+esac
+case "$FILTER_URL" in
+file:/*)
+    display `echo "$FILTER_URL" | sed 's,^file:,,; s,\?.*$,,'`
+    ;;
+*)
+    tmpf=/tmp/.konqe-dl-$$.zip
+    cat >$tmpf
+    display $tmpf
+    rm $tmpf
+    ;;
+esac

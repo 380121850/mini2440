@@ -1,0 +1,63 @@
+#!/bin/sh
+
+# This file is part of the KDE project
+# Copyright (C) 2002 Paul Chitescu <paulc-devel@null.ro>
+# License: Open Source, Use On Your Own Risk
+#
+# Konqueror/Embedded "cache:" protocol handler
+#
+# Requires: sh, basename, grep, awk, tail
+#
+# Usage: in your konq-embedrc file,
+#
+# [Local Protocols]
+# cache=!/path/to/this/file
+
+# edit the cache location and max. displayed length on the lines below
+cache="/tmp/konqe-cache"
+maxlen=50
+
+# you shouldn't need to change anything below
+if [ -n ""`echo "$SCRIPT_NAME" | grep '/\.\.'` ]; then
+    echo "Error: Malformed URL"
+    exit
+fi
+
+cache="${cache}$SCRIPT_NAME"
+if [ ! -e "$cache" ]; then
+
+    echo "Error: No such cache entryperhaps it expired"
+    exit
+fi
+if [ -d "$cache" ]; then
+    echo 'Info-Message: Listing cache entries'
+    echo 'Content-Type: text/html'
+    echo ''
+    echo '<html><body>'
+    if [ "$SCRIPT_NAME" != "/" ]; then
+	echo '(dir) <a href="..">..</a><br/>'
+    fi
+    for i in "$cache"*; do
+	if [ -e "$i" ]; then
+	    if [ -d "$i" ]; then
+		short=`basename $i`
+		echo "(dir) <a href=\"$short/\">$short</a><br/>"
+	    else
+		awk -v maxlen=$maxlen '
+BEGIN { h=int((maxlen-3)/2); }
+NR==2 {
+ fname=gensub("^.*/","",1,FILENAME);
+ if (match(fname,"\.new$")) exit;
+ disp=gensub("^[[:alpha:]]*://","",1,$0); l=length(disp);
+ if (l > 2*h+3) disp=substr(disp,0,h) "..." substr(disp,l-h);
+ printf("(<a href=\"%s\">cache</a>) <a href=\"%s\">%s</a><br/>\n",fname,$0,disp);
+ exit;
+}' "$i"
+	    fi
+	fi
+    done
+    echo '</body></html>'
+else
+    echo -n "Content-Type: "
+    exec tail -n +7 <"$cache"
+fi

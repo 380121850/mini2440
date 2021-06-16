@@ -1,0 +1,11 @@
+--- ../../kdelibs/kdecore/kstddirs.cpp	Wed Jan 24 23:29:38 2001
++++ ./kdesrc/kdecore/kstddirs.cpp	Sat Oct  6 19:00:03 2001
+@@ -803,7 +803,7 @@ void KStandardDirs::addKDEDefaults()
+     QString localKdeDir = readEnvPath("KDEHOME");
+     if (!localKdeDir.isEmpty())
+     {
+-       if (localKdeDir[localKdeDir.length()-1] != '/')
++       if (localKdeDir[(int)localKdeDir.length()-1] != '/')
+           localKdeDir += '/';
+     }
+     else

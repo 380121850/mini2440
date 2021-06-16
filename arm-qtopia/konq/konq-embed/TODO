@@ -1,0 +1,10 @@
+- cleanup the job/jobclasses mess!
+
+- properly disconnect slaves from jobs
+
+- ignore SIGPIPE in slaves and fix the scheduler to deal with dying
+  slaves
+
+- don't try to display framed sites in one but separate the frames into
+  separate views and provide a 'entry' page, like lynx
+

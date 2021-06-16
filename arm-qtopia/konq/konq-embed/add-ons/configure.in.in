@@ -1,0 +1,45 @@
+AC_ARG_ENABLE(add-ons, [  --enable-add-ons[=DIR1,DIR2,...]
+                          configure and build add-ons in DIR1,DIR2,...
+                          search for add-ons if no parameter given],
+    [case "$enableval" in
+	yes) add_ons=""
+	    for f in $srcdir/konq-embed/add-ons/*; do
+		test -f "$f/konqe_info" && add_ons="$add_ons "`echo $f | sed 's,^.*/,,'`
+	    done
+	    ;;
+	*) add_ons=`echo "$enableval" | sed 's/,/ /g'`
+	    ;;
+    esac], [add_ons=])
+add_ons=`echo "$add_ons" | sed 's,^ ,,; s, $,,'`
+ADD_ON_DIRS=$add_ons
+AC_SUBST(ADD_ON_DIRS)
+
+add_on_libs=""
+add_on_init=""
+add_on_dyn_libs=""
+add_on_dyn_init=""
+for f in $add_ons; do
+    i="$srcdir/konq-embed/add-ons/$f/konqe_info"
+    if test -f "$i"; then
+	v=`awk '$1 == "init:" { for (n=2;n<=NF;n++) printf($n (n == NF ? "" : " ")); printf("\n") }' < $i`
+	test -n "$v" && add_on_init="$add_on_init $v"
+	v=`awk '$1 == "dyn-init:" { for (n=2;n<=NF;n++) printf($n (n == NF ? "" : " ")); printf("\n") }' < $i`
+	test -n "$v" && add_on_dyn_init="$add_on_dyn_init $v"
+	v=`awk '$1 == "libs:" { for (n=2;n<=NF;n++) printf($n (n == NF ? "" : " ")); printf("\n") }' < $i`
+	for i in $v; do
+	    add_on_libs="$add_on_libs \$(top_builddir)/konq-embed/add-ons/$f/$i"
+	done
+	v=`awk '$1 == "dyn-libs:" { for (n=2;n<=NF;n++) printf($n (n == NF ? "" : " ")); printf("\n") }' < $i`
+	for i in $v; do
+	    add_on_dyn_libs="$add_on_dyn_libs \$(top_builddir)/konq-embed/add-ons/$f/$i"
+	done
+    fi
+done
+LIB_ADDONS=$add_on_libs
+AC_SUBST(LIB_ADDONS)
+INIT_ADDONS=$add_on_init
+AC_SUBST(INIT_ADDONS)
+LIB_DYN_ADDONS=$add_on_dyn_libs
+AC_SUBST(LIB_DYN_ADDONS)
+INIT_DYN_ADDONS=$add_on_dyn_init
+AC_SUBST(INIT_DYN_ADDONS)

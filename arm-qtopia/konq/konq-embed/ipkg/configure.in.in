@@ -1,0 +1,11 @@
+dnl AC_OUTPUT(konq-embed/ipkg/konq-embedrc)
+dnl AC_OUTPUT(konq-embed/ipkg/preinst)
+
+konq_tmp_prefix=/tmp
+AC_ARG_WITH(konq-tmp-prefix,
+[  --with-konq-tmp-prefix=DIR   directory to use as disk-cache on iPAQ],
+[konq_tmp_prefix=$withval])
+
+AC_SUBST(konq_tmp_prefix)
+
+

@@ -1,0 +1,113 @@
+--- ../../kdelibs/khtml/html/html_formimpl.cpp	Wed Aug  8 16:11:51 2001
++++ ./kdesrc/khtml/html/html_formimpl.cpp	Sun Oct  7 12:36:34 2001
+@@ -107,7 +107,7 @@ static QCString encodeCString(const QCSt
+     //QCString orig(e.data(), e.size());
+ 
+     for(unsigned pos = 0; pos < e.length(); pos++) {
+-        unsigned char c = e[pos];
++        unsigned char c = e[(int)pos];
+ 
+         if ( (( c >= 'A') && ( c <= 'Z')) ||
+              (( c >= 'a') && ( c <= 'z')) ||
+@@ -182,7 +182,8 @@ QByteArray HTMLFormElementImpl::formData
+     // find out the QTextcodec to use
+     QString str = m_acceptcharset.string();
+     QChar space(' ');
+-    for(unsigned int i=0; i < str.length(); i++) if(str[i].latin1() == ',') str[i] = space;
++    unsigned int i;
++    for(i=0; i < str.length(); i++) if(str[(int)i].latin1() == ',') str[(int)i] = space;
+     QStringList charsets = QStringList::split(' ', str);
+     QTextCodec* codec = 0;
+     for ( QStringList::Iterator it = charsets.begin(); it != charsets.end(); ++it )
+@@ -209,8 +210,8 @@ QByteArray HTMLFormElementImpl::formData
+         codec = QTextCodec::codecForLocale();
+ 
+     m_encCharset = codec->name();
+-    for(unsigned int i=0; i < m_encCharset.length(); i++)
+-        m_encCharset[i] = m_encCharset[i].latin1() == ' ' ? QChar('-') : m_encCharset[i].lower();
++    for(i=0; i < m_encCharset.length(); i++)
++        m_encCharset[(int)i] = m_encCharset[(int)i].latin1() == ' ' ? QChar('-') : m_encCharset[(int)i].lower();
+ 
+     for(HTMLGenericFormElementImpl *current = formElements.first(); current; current = formElements.next())
+     {
+@@ -276,8 +277,8 @@ QByteArray HTMLFormElementImpl::formData
+                     form_data.resize( old_size + hstr.length() + (*it).size() + 1);
+                     memcpy(form_data.data() + old_size, hstr.data(), hstr.length());
+                     memcpy(form_data.data() + old_size + hstr.length(), *it, (*it).size());
+-                    form_data[form_data.size()-2] = '\r';
+-                    form_data[form_data.size()-1] = '\n';
++                    form_data[(int)form_data.size()-2] = '\r';
++                    form_data[(int)form_data.size()-1] = '\n';
+                 }
+             }
+         }
+@@ -1402,7 +1403,7 @@ DOMString HTMLSelectElementImpl::type() 
+ 
+ long HTMLSelectElementImpl::selectedIndex() const
+ {
+-    uint i;
++    int i;
+     bool hasOption = false;
+     for (i = 0; i < m_listItems.size(); i++) {
+         if (m_listItems[i]->id() == ID_OPTION)
+@@ -1433,7 +1434,7 @@ void HTMLSelectElementImpl::setSelectedI
+ long HTMLSelectElementImpl::length() const
+ {
+     int len = 0;
+-    uint i;
++    int i;
+     for (i = 0; i < m_listItems.size(); i++) {
+         if (m_listItems[i]->id() == ID_OPTION)
+             len++;
+@@ -1467,7 +1468,7 @@ void HTMLSelectElementImpl::remove( long
+ 
+ DOMString HTMLSelectElementImpl::value( )
+ {
+-    uint i;
++    int i;
+     for (i = 0; i < m_listItems.size(); i++) {
+         if (m_listItems[i]->id() == ID_OPTION
+             && static_cast<HTMLOptionElementImpl*>(m_listItems[i])->selected())
+@@ -1610,7 +1611,7 @@ bool HTMLSelectElementImpl::encoding(con
+     bool successful = false;
+     QCString enc_name = fixUpfromUnicode(codec, _name.string().stripWhiteSpace());
+ 
+-    uint i;
++    int i;
+     for (i = 0; i < m_listItems.size(); i++) {
+         if (m_listItems[i]->id() == ID_OPTION) {
+             HTMLOptionElementImpl *option = static_cast<HTMLOptionElementImpl*>(m_listItems[i]);
+@@ -1683,13 +1684,13 @@ void HTMLSelectElementImpl::recalcListIt
+         if (!inOptGroup && current->id() == ID_OPTGROUP && current->firstChild()) {
+             // ### what if optgroup contains just comments? don't want one of no options in it...
+             m_listItems.resize(m_listItems.size()+1);
+-            m_listItems[m_listItems.size()-1] = static_cast<HTMLGenericFormElementImpl*>(current);
++            m_listItems[(int)m_listItems.size()-1] = static_cast<HTMLGenericFormElementImpl*>(current);
+             current = current->firstChild();
+             inOptGroup = true;
+         }
+         if (current->id() == ID_OPTION) {
+             m_listItems.resize(m_listItems.size()+1);
+-            m_listItems[m_listItems.size()-1] = static_cast<HTMLGenericFormElementImpl*>(current);
++            m_listItems[(int)m_listItems.size()-1] = static_cast<HTMLGenericFormElementImpl*>(current);
+             if (foundSelected && !m_multiple && static_cast<HTMLOptionElementImpl*>(current)->selected())
+                 static_cast<HTMLOptionElementImpl*>(current)->setSelected(false);
+             foundSelected = static_cast<HTMLOptionElementImpl*>(current)->selected();
+@@ -1710,7 +1711,7 @@ void HTMLSelectElementImpl::recalcListIt
+ 
+ void HTMLSelectElementImpl::reset()
+ {
+-    uint i;
++    int i;
+     for (i = 0; i < m_listItems.size(); i++) {
+         if (m_listItems[i]->id() == ID_OPTION) {
+             HTMLOptionElementImpl *option = static_cast<HTMLOptionElementImpl*>(m_listItems[i]);
+@@ -1726,7 +1727,7 @@ void HTMLSelectElementImpl::notifyOption
+ {
+     if (selected && !m_multiple) {
+         // deselect all other options
+-        uint i;
++        int i;
+         for (i = 0; i < m_listItems.size(); i++) {
+             if (m_listItems[i]->id() == ID_OPTION && m_listItems[i] != selectedOption)
+                 static_cast<HTMLOptionElementImpl*>(m_listItems[i])->setSelected(false);

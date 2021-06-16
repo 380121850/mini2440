@@ -1,0 +1,3 @@
+dyn-init: konqe_register_libkflash
+dyn-libs: libkflash_e.la
+symbols: konqe_register_libkflash init_libkflash

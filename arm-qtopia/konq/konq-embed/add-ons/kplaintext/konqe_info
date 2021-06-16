@@ -1,0 +1,2 @@
+init: konqe_register_libkplaintextpart
+libs: libkplaintext_e.la

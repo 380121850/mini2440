@@ -1,0 +1,11 @@
+--- ../../kdelibs/khtml/misc/khtmllayout.h	Mon Feb 12 23:00:40 2001
++++ ./kdesrc/khtml/misc/khtmllayout.h	Mon Oct  8 17:29:31 2001
+@@ -110,7 +110,7 @@ namespace khtml
+ 	bool isFixed() const { return (type == Fixed); }
+         bool isStatic() const { return (type == Static); }
+ 	int value : 29;
+-	LengthType type : 3;
++	LengthType type;
+     };
+     
+ };

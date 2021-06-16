@@ -1,0 +1,38 @@
+--- ../../kdelibs/khtml/html/htmlparser.cpp	Wed Aug 29 09:14:00 2001
++++ ./kdesrc/khtml/html/htmlparser.cpp	Sun Oct  7 12:10:36 2001
+@@ -170,7 +170,7 @@ void KHTMLParser::reset()
+     noRealBody = true;
+     haveFrameSet = false;
+     inSelect = false;
+-    _inline = false;
++    m_inline = false;
+ 
+     form = 0;
+     map = 0;
+@@ -202,7 +202,7 @@ void KHTMLParser::parseToken(Token *t)
+ #ifdef PARSER_DEBUG
+     kdDebug( 6035 ) << "\n\n==> parser: processing token " << getTagName(t->id).string() << "(" << t->id << ")"
+                     << " current = " << getTagName(current->id()).string() << "(" << current->id() << ")" << endl;
+-    kdDebug(6035) << "inline=" << _inline << " inBody=" << inBody << " noRealBody=" << noRealBody << " haveFrameSet=" << haveFrameSet << endl;
++    kdDebug(6035) << "inline=" << m_inline << " inBody=" << inBody << " noRealBody=" << noRealBody << " haveFrameSet=" << haveFrameSet << endl;
+ #endif
+ 
+     // holy shit. apparently some sites use </br> instead of <br>
+@@ -292,7 +292,7 @@ bool KHTMLParser::insertNode(NodeImpl *n
+             if(!n->attached() && HTMLWidget )  n->attach();
+ #endif
+             //_inline = current->isInline();
+-            if(current->isInline()) _inline = true;
++            if(current->isInline()) m_inline = true;
+         }
+         else {
+ #if SPEED_DEBUG < 2
+@@ -1143,7 +1143,7 @@ void KHTMLParser::popOneBlock()
+     // we only set inline to false, if the element we close is a block level element.
+     // This helps getting cases as <p><b>bla</b> <b>bla</b> right.
+     if(!current->isInline())
+-        _inline = false;
++        m_inline = false;
+     current = Elem->node;
+ 
+     delete Elem;

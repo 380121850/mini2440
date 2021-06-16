@@ -1,0 +1,19 @@
+ECHO OFF
+SAY "C Initializing the modem\n"
+ABORT "NO CARRIER"
+ABORT "NO DIALTONE"
+ABORT "NO ANSWER"
+ABORT "BUSY"
+ABORT "ERROR"
+REPORT "CONNECT"
+TIMEOUT 10
+"" "AT"
+OK "AT&f"
+OK "ATe1q0v1w2x4\\v1\\n2&p0&d0&c1s0=0s2=43s12=50s10=20"
+OK "ATM1L2"
+OK "AT\U"
+SAY "C Dialing \T\n"
+OK "ATX4DT\T"
+TIMEOUT 90
+CONNECT \c
+SAY "C Connected, starting PPP\n"

@@ -1,0 +1,39 @@
+--- ../../kdelibs/kio/authinfo.cpp	Fri Jul 27 20:17:31 2001
++++ ./kdesrc/kio/authinfo.cpp	Sun Oct  7 15:54:45 2001
+@@ -241,10 +241,12 @@ int NetRC::openf( const QString& f )
+     if ( stat(ef, &sbuff) != 0 )
+         return -1;
+ 
++#if !defined(Q_WS_WIN)
+     // Security check!!
+     if ( sbuff.st_mode != (S_IFREG|S_IRUSR|S_IWUSR) ||
+          sbuff.st_uid != geteuid() )
+         return -1;
++#endif
+ 
+     return open( ef, O_RDONLY );
+ }
+@@ -258,7 +260,7 @@ QString NetRC::extract( const char* buf,
+     while( idx < b_len )
+     {
+         while( buf[idx] == ' ' || buf[idx] == '\t' ) idx++;
+-        if ( strncasecmp( buf+idx, key, m_len ) == 0 )
++        if ( qstrnicmp( buf+idx, key, m_len ) == 0 )
+         {
+             idx += m_len;
+             while( buf[idx] == ' ' || buf[idx] == '\t' ) idx++;
+@@ -316,12 +318,12 @@ void NetRC::parse( int fd )
+         l.machine = extract( buf, "machine", pos );
+         if ( l.machine.isEmpty() )
+         {
+-            if (strncasecmp(buf+pos, "default", 7) == 0 )
++            if (qstrnicmp(buf+pos, "default", 7) == 0 )
+             {
+                 pos += 7;
+                 l.machine = QString::fromLatin1("default");
+             }
+-            else if (strncasecmp(buf+pos, "preset", 6) == 0 )
++            else if (qstrnicmp(buf+pos, "preset", 6) == 0 )
+             {
+                 pos += 6;
+                 l.machine = QString::fromLatin1("preset");

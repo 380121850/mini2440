@@ -1,0 +1,28 @@
+#!/bin/bash
+
+cp -a qtopia-2.2.0-FriendlyARM/qtopia/image/opt .
+/bin/rm opt/Qtopia/lib/fonts/helvetica_* 
+tar xfvz fonts.tar.gz 
+
+cp konq/konq-embed/src/konqueror opt/Qtopia/bin
+mkdir opt/Qtopia/pics/konqueror
+cp konq/konq-embed/src/konqueror.png opt/Qtopia/pics/konqueror
+
+mkdir -p ./opt/kde/share/apps/khtml/css
+mkdir -p ./opt/kde/share/config
+cp konq/konq-embed/kdesrc/khtml/css/html4.css ./opt/kde/share/apps/khtml/css
+cp konq/konq-embed/kdesrc/kdecore/charsets ./opt/kde/share/config
+
+mkdir opt/Qtopia/apps/FriendlyARM
+cp konq/konq-embed/src/konqueror.desktop opt/Qtopia/apps/FriendlyARM/
+cat > opt/Qtopia/apps/FriendlyARM/.directory << EOF
+[Translation]
+File=QtopiaApps
+Context=FriendlyARM
+[Desktop Entry]
+Name[]=FriendlyARM
+Icon=FriendlyARM
+EOF
+
+tar cfvz target-qtopia-konq.tgz opt
+rm -fr opt

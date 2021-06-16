@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# This file is part of the KDE project
+# Copyright (C) 2003 Paul Chitescu <paulc-devel@null.ro>
+# License: Open Source, Use On Your Own Risk
+#
+# Konqueror/Embedded Tar+Gzip to HTML data filter
+#
+# Requires: sh, sed, awk, tar, zcat (gzip)
+#
+# Usage: in your konq-embedrc file,
+#
+# [MIME Handlers]
+# application/x-tgz,.tgz,.tar.gz=|text/html|/path/to/this/file
+
+# you shouldn't need to change anything below
+sedhtml='s/&/\&amp;/g; s/"/\&quot;/g; s/</\&lt;/g; s/>/\&gt;/g'
+case "$FILTER_URL" in
+*\?*)
+    file=`echo "$FILTER_URL" | sed 's,^.*[?],,'`
+    case "$FILTER_MIME_OUT" in
+    image/*|audio/*|text/html|text/plain)
+	zcat -f | tar xf - -O "$file"
+	;;
+    *)
+	echo -n "<HTML><HEAD><TITLE>tgz-file: $file</TITLE></HEAD><BODY><PRE>"
+	zcat -f | tar xf - -O "$file" 2>&1 | sed "$sedhtml"
+	echo '</PRE></BODY></HTML>'
+	;;
+    esac
+    exit 0
+    ;;
+*)
+    file=""
+    ;;
+esac
+title='tgz-list: '`echo -n "$FILTER_URL" | sed "$sedhtml"`
+echo -n "<HTML><HEAD><TITLE>$title</TITLE></HEAD><BODY>"
+echo "<PRE><B>$title</B><BR/><HR/>"
+zcat -f | tar tf - | awk '{ gsub("\r*$",""); s = $0;
+  gsub("&","\\&amp;",s); gsub("\"","\\&quot;",s);
+  gsub("<","\\&lt;",s); gsub(">","\\&gt;",s);
+}
+  /\/$/ { print s; next; }
+{ printf("<A HREF=\"??%s\">%s</A>\n",s,s); }
+'
+echo '</PRE></BODY></HTML>'

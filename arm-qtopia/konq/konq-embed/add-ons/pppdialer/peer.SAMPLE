@@ -1,0 +1,2 @@
+remotename sample
+connect '/usr/sbin/chat -f /etc/ppp/chat -r /var/log/connects -T 12345678'

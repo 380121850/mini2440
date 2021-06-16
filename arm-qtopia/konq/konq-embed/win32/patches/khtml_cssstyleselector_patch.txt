@@ -1,0 +1,37 @@
+--- ../../kdelibs/khtml/css/cssstyleselector.cpp	Wed Sep  5 14:38:40 2001
++++ ./kdesrc/khtml/css/cssstyleselector.cpp	Sun Oct  7 11:47:49 2001
+@@ -640,22 +640,23 @@ void CSSStyleSelector::buildLists()
+     *prop = 0;
+ 
+     // This algorithm sucks badly. but hey, its performance shouldn't matter much ( Dirk )
+-    for ( unsigned int sel = 0; sel < selectors_size; ++sel ) {
++    // (sel -> _sel to work around MSVC++ bug)
++    for ( unsigned int _sel = 0; _sel < selectors_size; ++_sel ) {
+         prop = properties;
+         int len = 0;
+         int offset = 0;
+-        bool matches = properties[0] ? properties[0]->selector == sel : false;
++        bool matches = properties[0] ? properties[0]->selector == _sel : false;
+         for ( unsigned int p = 0; p < properties_size; ++p ) {
+-            if ( !properties[p] || ( matches != ( properties[p]->selector == sel ) )) {
++            if ( !properties[p] || ( matches != ( properties[p]->selector == _sel ) )) {
+                 if ( matches ) {
+-                    int* newprops = new int[selectorCache[sel].props_size+2];
+-                    for ( unsigned int i=0; i < selectorCache[sel].props_size; i++ )
+-                        newprops[i] = selectorCache[sel].props[i];
+-                    newprops[selectorCache[sel].props_size] = offset;
+-                    newprops[selectorCache[sel].props_size+1] = len;
+-                    delete [] selectorCache[sel].props;
+-                    selectorCache[sel].props = newprops;
+-                    selectorCache[sel].props_size += 2;
++                    int* newprops = new int[selectorCache[_sel].props_size+2];
++                    for ( unsigned int i=0; i < selectorCache[_sel].props_size; i++ )
++                        newprops[i] = selectorCache[_sel].props[i];
++                    newprops[selectorCache[_sel].props_size] = offset;
++                    newprops[selectorCache[_sel].props_size+1] = len;
++                    delete [] selectorCache[_sel].props;
++                    selectorCache[_sel].props = newprops;
++                    selectorCache[_sel].props_size += 2;
+                     matches = false;
+                 }
+                 else {

@@ -1,0 +1,75 @@
+
+!! Legal notes !!
+
+a) DO NOT DISTRIBUTE QT/WIN-NON-COMMERCIAL WITH KONQ/WIN
+
+[ TODO: add more ]
+
+
+How to compile:
+
+You'll need Qt/Windows 2.3 Non-Commercial, available from 
+Trolltech's website (http://www.trolltech.com/) . Qt/Win-NC
+also requires MSVC++ . Make sure to have the latest servicepacks 
+installed!
+
+If you're building from CVS the following steps are needed for 
+preparation:
+
+) check out kdelibs, with the KDE_2_2_1_RELEASE tag
+
+) check out kdenox, with the KONQ_1_0_BRANCH tag (in the same 
+  directory as kdelibs)
+
+) run 'make -f Makefile.cvs win32'
+
+The moc of Qt/Win-NC 2.3 generates under certain circumstances
+(extensive use of namespaces) code that triggers a MSVC++ bug, making
+the moc generated code uncompilable. Konq makes extensive use of 
+namespaces ;-) . There are two possible workarounds:
+
+1) Fix all the moc files that trigger the error manually. Just remove the
+   namespace prefix from the offending statement 
+   (it's a strcmp(NamespaceName::Class::...) , remove the 'NamespaceName::' )
+
+2) If you have the sources on a samba share so you can access them from both
+   worlds then there's a much easier way:
+
+   First switch to the windows box, open a commandline window, cd into the
+   kdenox\konq-embed directory. Create the Makefile using 
+   'tmake -o Makefile konq.pro' . Next run 'nmake moc' . That should generate
+   all moc files.
+
+   Switch to the unix box, cd into the kdenox/konq-embed directory and run
+   './win32/fixmocfiles.zsh' .
+
+) make sure you have a JPEGDIR environment variable set. It needs to point
+  to a directory where the jpeg includes and libjpeg.lib are located.
+
+) in addition make you need PCREDIR set to point to your pcre installation
+  (include files and libpcre.lib and libpcreposix.lib)
+
+  In the win32 subdir you can find a pcre.pro and a pcreposix.pro, for use 
+  with tmake to build pcre as static library. (note that this is optional
+  and you can of course also build it manually as suggested in the README)
+
+) If you did not already (as part of the moc fixlets) it's now time to generate
+  the Makefile, using 'tmake -o Makefile konq.pro' , to be executed in the
+  kdenox\konq-embed directory.
+
+) run 'nmake' and wait ;-)
+
+How to run:
+
+For now (still needs to be improved) you have to create a directory structure
+like this:
+
+ <some path>\share\apps\khtml\css
+ <some path>\share\config
+
+ copy 'kdesrc\kdecore\charsets' into the config directory and
+ 'kdesrc\khtml\css\html4.css' into the css directory.
+
+ now you should be able to run konq.exe :-)
+
+

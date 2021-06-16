@@ -1,0 +1,20 @@
+--- ../../kdelibs/khtml/css/cssparser.cpp	Fri Aug 31 11:56:43 2001
++++ ./kdesrc/khtml/css/cssparser.cpp	Sun Oct  7 11:44:58 2001
+@@ -799,7 +799,7 @@ public:
+ 
+     QChar m_yyChar;
+     QString m_yyIn, m_yyStr;
+-    unsigned int m_yyPos;
++    int m_yyPos;
+     int m_yyTok;
+     bool strictParsing;
+ 
+@@ -1782,7 +1782,7 @@ bool StyleBaseImpl::parseValue( const QC
+                 if(face.length() == 0) break;
+                 // ### single quoted is missing...
+                 if(face[0] == '\"') face.remove(0, 1);
+-                if(face[face.length()-1] == '\"') face = face.left(face.length()-1);
++                if(face[(int)face.length()-1] == '\"') face = face.left((int)face.length()-1);
+                 //kdDebug( 6080 ) << "found face '" << face << "'" << endl;
+                 list->append(new CSSPrimitiveValueImpl(DOMString(face), CSSPrimitiveValue::CSS_STRING));
+                 pos = pos2 + 1;

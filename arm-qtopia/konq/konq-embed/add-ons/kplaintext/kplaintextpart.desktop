@@ -1,0 +1,6 @@
+[Desktop Entry]
+MimeType=text/english;text/plain;text/script;application/x-shellscript
+ServiceTypes=KParts/ReadOnlyPart,KParts/ReadWritePart
+X-KDE-Library=libkplaintextpart
+Type=Service
+Name=Embedded Text Editor

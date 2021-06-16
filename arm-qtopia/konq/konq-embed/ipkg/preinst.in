@@ -1,0 +1,15 @@
+#!/bin/sh
+
+prefix=@prefix@
+prunefiles="lib/libkhtml.la lib/libkhtml.so lib/libkhtml.so.4.0.0"
+prunefiles="$prunefiles lib/libkhtml.so.4"
+prunefiles="$prunefiles lib/kjs_html.la lib/kjs_html.so"
+
+for _file in $prunefiles; do
+    file=$PKG_ROOT/$prefix/$_file;
+    if [ -f $file ]; then
+        echo "found old file $_file from b0rked konqueror ipkg. removing."
+	rm -f $file
+    fi
+done
+

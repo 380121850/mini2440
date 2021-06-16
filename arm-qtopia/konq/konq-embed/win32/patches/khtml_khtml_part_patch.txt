@@ -1,0 +1,47 @@
+--- ../../kdelibs/khtml/khtml_part.cpp	Mon Aug 27 14:50:16 2001
++++ ./kdesrc/khtml/khtml_part.cpp	Sun Oct  7 15:05:12 2001
+@@ -2154,15 +2154,18 @@ void KHTMLPart::overURL( const QString &
+     // to use KFileItem::statusBarText()
+     QCString path = QFile::encodeName( u.path() );
+ 
++#if !defined(Q_WS_WIN)
+     struct stat buff;
+     bool ok = !stat( path.data(), &buff );
+ 
+     struct stat lbuff;
+     if (ok) ok = !lstat( path.data(), &lbuff );
++#endif
+ 
+     QString text = u.url();
+     QString text2 = text;
+ 
++#if !defined(Q_WS_WIN)
+     if (ok && S_ISLNK( lbuff.st_mode ) )
+     {
+       QString tmp;
+@@ -2208,6 +2211,7 @@ void KHTMLPart::overURL( const QString &
+       text += "  ";
+       text += com;
+     }
++#endif
+     emit setStatusBarText(text);
+   }
+   else
+@@ -3607,7 +3611,7 @@ bool KHTMLPart::dndEnabled() const
+ 
+ bool KHTMLPart::event( QEvent *event )
+ {
+-  if ( KParts::ReadOnlyPart::event( event ) )
++  if ( ReadOnlyPart::event( event ) )
+    return true;
+ 
+   if ( khtml::MousePressEvent::test( event ) )
+@@ -3972,7 +3976,7 @@ void KHTMLPart::khtmlDrawContentsEvent( 
+ bool KHTMLPart::eventFilter( QObject* o, QEvent* ev )
+ {
+     // ### BCI remove for 3.0 (no longer needed)
+-    return KParts::ReadOnlyPart::eventFilter( o, ev );
++    return ReadOnlyPart::eventFilter( o, ev );
+ }
+ 
+ void KHTMLPart::guiActivateEvent( KParts::GUIActivateEvent *event )

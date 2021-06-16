@@ -1,0 +1,2 @@
+init: konqe_register_libjsdebug
+libs: libjsdebug_e.la

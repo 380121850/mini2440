@@ -1,0 +1,11 @@
+Package: konqueror
+Installed-Size: @konq_ipkg_size@
+Priority: optional
+Section: qpe/applications
+Maintainer: Konqueror/Embedded Team <konq-e@kde.org>
+Architecture: @konq_ipkg_arch@
+Version: @konq_ipkg_version@
+Pre-Depends: libc6 (>= 2.1.2)
+Depends: qt-embedded (>=2.3.2), opie-base, libjpeg62
+Description: The embedded konqueror web browser from the KDE project. 
+ Built with qt-embedded for use with qpe.

@@ -1,0 +1,13 @@
+--- ../../kdelibs/khtml/css/cssparser.h	Sun Jul 29 18:12:45 2001
++++ ./kdesrc/khtml/css/cssparser.h	Mon Oct  8 17:51:10 2001
+@@ -78,8 +78,8 @@ public:
+ 	SubSelector
+     };
+ 
+-    Relation relation 	: 2;
+-    Match 	 match 	: 3;
++    Relation relation 	;
++    Match 	 match 	;
+     bool	nonCSSHint : 1;
+     unsigned int 	pseudoId : 2;
+     int          attr;

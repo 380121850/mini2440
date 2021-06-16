@@ -1,0 +1,12 @@
+--- ../../kdelibs/kio/slaveinterface.cpp	Thu Jun  7 10:38:57 2001
++++ ./kdesrc/kio/slaveinterface.cpp	Sun Oct  7 15:39:02 2001
+@@ -36,7 +36,9 @@ SlaveInterface::SlaveInterface( Connecti
+ {
+     m_pConnection = connection;
+     m_progressId = 0;
++#if !defined(Q_WS_WIN)
+     signal( SIGPIPE, sigpipe_handler );
++#endif
+ }
+ 
+ SlaveInterface::~SlaveInterface()

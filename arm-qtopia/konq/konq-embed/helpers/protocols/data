@@ -1,0 +1,70 @@
+#!/bin/sh
+
+# This file is part of the KDE project
+# Copyright (C) 2002 Paul Chitescu <paulc-devel@null.ro>
+# License: Open Source, Use On Your Own Risk
+#
+# Konqueror/Embedded RFC2397 "data:" protocol handler
+#
+# Extension: the MIME type and extra parameters can be encoded in the query,
+#    leaving the path and filename arbitrary and usable as default filename.
+#
+# Requires: sh, sed, awk, mimencode (only for base64)
+#
+# Usage: in your konq-embedrc file,
+#
+# [Local Protocols]
+# data=!/path/to/this/file
+
+# you shouldn't need to change anything below
+urldecode='{
+  tmp=$0; gsub("+"," ",tmp); b=1;
+  do { i=match(substr(tmp,b),"%[[:xdigit:]][[:xdigit:]]");
+    if (i) {
+      i=i+b; b=i;
+      hex="0x" toupper(substr(tmp,i,2)); hex=0+hex;
+      if (hex < 32) hex=63;
+      tmp=sprintf("%s%c%s",substr(tmp,1,i-2),hex,substr(tmp,i+2));
+    }
+  } while (i);
+  print tmp; exit
+}'
+
+if [ -n "$QUERY_STRING" ]; then
+    head="$QUERY_STRING"
+else
+    head="$REQUEST_URL"
+fi
+
+data=`echo "$head" | awk '/,/ {print}'`
+if [ -z "$data" ]; then
+    data=`echo "$head" | awk "$urldecode"`
+else
+    urld=1
+fi
+
+head=`echo "$data" | sed 's+,.*$++; s+^[[:alpha:]]*:++; s+^/++'`
+data=`echo "$data" | sed 's+^.*,++'`
+
+de64=`echo "$head" | awk '/;base64$/ {print}'`
+head=`echo "$head" | sed 's+;base64$++'`
+
+if [ -z "$head" ]; then
+    head="text/plain"
+fi
+
+if [ -n "$data" ]; then
+    echo "Content-Type: $head"
+    echo ""
+    if [ -n "$de64" ]; then
+	echo "$data" | mimencode -u
+    else
+	if [ -n "$urld" ]; then
+	    echo "$data" | awk "$urldecode"
+	else
+	    echo -n "$data"
+	fi
+    fi
+else
+    echo "Error: No data specified"
+fi

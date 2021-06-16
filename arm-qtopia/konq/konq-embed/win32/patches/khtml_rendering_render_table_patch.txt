@@ -1,0 +1,176 @@
+--- ../../kdelibs/khtml/rendering/render_table.cpp	Mon Jul 30 21:45:49 2001
++++ ./kdesrc/khtml/rendering/render_table.cpp	Sun Oct  7 14:29:28 2001
+@@ -193,15 +193,15 @@ void RenderTable::addChild(RenderObject 
+         }
+         return;
+     case TABLE_HEADER_GROUP:
+-        if(incremental && !columnPos[totalCols]);// calcColWidth();
++        if(incremental && !columnPos[(int)totalCols]);// calcColWidth();
+ //      setTHead(static_cast<RenderTableSection *>(child));
+         break;
+     case TABLE_FOOTER_GROUP:
+-        if(incremental && !columnPos[totalCols]);// calcColWidth();
++        if(incremental && !columnPos[(int)totalCols]);// calcColWidth();
+ //      setTFoot(static_cast<RenderTableSection *>(child));
+         break;
+     case TABLE_ROW_GROUP:
+-        if(incremental && !columnPos[totalCols]);// calcColWidth();
++        if(incremental && !columnPos[(int)totalCols]);// calcColWidth();
+         if(!firstBody)
+             firstBody = static_cast<RenderTableSection *>(child);
+         break;
+@@ -346,11 +346,12 @@ void RenderTable::addColumns( int num )
+ 
+     colInfos.resize(mSpan);
+ 
+-    for ( unsigned int c =0 ; c < totalCols; c++ )
++    unsigned int c;
++    for ( c =0 ; c < totalCols; c++ )
+     {
+         colInfos[c]->resize(newCols);
+     }
+-    for ( unsigned int c = totalCols; (int)c < newCols; c++ )
++    for ( c = totalCols; (int)c < newCols; c++ )
+     {
+         colInfos.insert(c, new ColInfoLine(newCols-c+1));
+     }
+@@ -798,8 +799,9 @@ void RenderTable::calcColMinMax()
+ 
+     availableWidth -= QMAX( style()->borderLeftWidth(), 0 );
+     availableWidth -= QMAX( style()->borderRightWidth(), 0 );
++    int s;
+     // PHASE 2, calculate simple minimums and maximums
+-    for ( unsigned int s=0;  (int)s<maxColSpan ; ++s)
++    for ( s=0; s<maxColSpan ; ++s)
+     {
+         ColInfoLine* spanCols = colInfos[s];
+ 
+@@ -902,7 +904,7 @@ void RenderTable::calcColMinMax()
+ 
+     }
+     
+-    for ( int s=0; s<maxColSpan ; ++s)
++    for ( s=0; s<maxColSpan ; ++s)
+     {
+         maxPercent = KMAX(spanPercentMax[s],maxPercent);
+         totalPercent = KMAX(spanPercent[s],int(totalPercent));
+@@ -936,7 +938,7 @@ void RenderTable::calcColMinMax()
+ 
+     // PHASE 4, calculate maximums for percent and relative columns
+ 
+-    for ( unsigned int s=0;  (int)s<maxColSpan ; ++s)
++    for ( s=0; s<maxColSpan ; ++s)
+     {
+         ColInfoLine* spanCols = colInfos[s];
+ 
+@@ -1046,7 +1048,7 @@ void RenderTable::calcColWidth(void)
+ 
+     actColWidth.fill(0);
+ 
+-    unsigned int i;
++    int i;
+     for(i = 0; i < totalCols; i++)
+     {
+         actColWidth[i] = colMinWidth[i];
+@@ -1116,7 +1118,7 @@ void RenderTable::calcColWidth(void)
+     /*
+      * If something remains, put it to the last column
+      */
+-    actColWidth[totalCols-1] += toAdd;
++    actColWidth[(int)totalCols-1] += toAdd;
+ 
+     /*
+      * Calculate the placement of colums
+@@ -1319,7 +1321,7 @@ void RenderTable::layout()
+ 
+     layoutRows(m_height);
+ 
+-    m_height += rowHeights[totalRows];
++    m_height += rowHeights[(int)totalRows];
+     m_height += borderBottom();
+ 
+     if(tCaption && tCaption->style()->captionSide()==CAPBOTTOM)
+@@ -1348,7 +1350,8 @@ void RenderTable::layoutRows(int yoff)
+     int rHeight;
+     int indx, rindx;
+ 
+-    for ( unsigned int r = 0; r < totalRows; r++ )
++    unsigned int r;
++    for ( r = 0; r < totalRows; r++ )
+     {    
+         for ( unsigned int c = 0; c < totalCols; c++ )
+         {
+@@ -1395,28 +1398,28 @@ void RenderTable::layoutRows(int yoff)
+             }
+         }
+     }
+-    if (th && totalRows && rowHeights[totalRows])
++    if (th && totalRows && rowHeights[(int)totalRows])
+     {
+         th-=(totalRows+1)*spacing;
+-        int dh = th-rowHeights[totalRows];
++        int dh = th-rowHeights[(int)totalRows];
+         if (dh>0)
+         {
+-            int tot=rowHeights[totalRows];
++            int tot=rowHeights[(int)totalRows];
+             int add=0;
+             int prev=rowHeights[0];            
+             for ( unsigned int r = 0; r < totalRows; r++ )
+             {
+                 //weight with the original height
+-                add+=dh*(rowHeights[r+1]-prev)/tot;
+-                prev=rowHeights[r+1];
+-                rowHeights[r+1]+=add;
++                add+=dh*(rowHeights[(int)r+1]-prev)/tot;
++                prev=rowHeights[(int)r+1];
++                rowHeights[(int)r+1]+=add;
+             }
+-            rowHeights[totalRows]=th;
++            rowHeights[(int)totalRows]=th;
+         }
+     }
+        
+     
+-    for ( unsigned int r = 0; r < totalRows; r++ )
++    for ( r = 0; r < totalRows; r++ )
+     {
+         for ( unsigned int c = 0; c < totalCols; c++ )
+         {
+@@ -1435,7 +1438,7 @@ void RenderTable::layoutRows(int yoff)
+                 rindx = 0;
+ 
+             //kdDebug( 6040 ) << "setting position " << r << "/" << indx << "-" << c << ": " << //columnPos[indx] + padding << "/" << rowHeights[rindx] << " " << endl;
+-            rHeight = rowHeights[r+1] - rowHeights[rindx] -
++            rHeight = rowHeights[(int)r+1] - rowHeights[(int)rindx] -
+                 spacing;
+ 
+             EVerticalAlign va = cell->style()->verticalAlign();
+@@ -1496,7 +1499,7 @@ void RenderTable::setCellWidths()
+         {
+             if ( ( indx = c-cell->colSpan()+1) < 0 )
+                 indx = 0;
+-            int w = columnPos[c+1] - columnPos[ indx ] - spacing ; //- padding*2;
++            int w = columnPos[(int)c+1] - columnPos[ indx ] - spacing ; //- padding*2;
+ 
+ #ifdef TABLE_DEBUG
+             kdDebug( 6040 ) << "0x" << this << ": setting width " << r << "/" << indx << "-" << c << " (0x" << cell << "): " << w << " " << endl;
+@@ -1647,7 +1650,8 @@ void RenderTable::recalcCells()
+ 
+     columnPos[0] = spacing;
+ 
+-    for (unsigned int r = 0; r < allocRows; r++)
++    unsigned int r;
++    for (r = 0; r < allocRows; r++)
+     {
+ 	delete[] cells[r];
+     }
+@@ -1660,7 +1664,7 @@ void RenderTable::recalcCells()
+ 
+     cells = new RenderTableCell ** [allocRows];
+ 
+-    for ( unsigned int r = 0; r < allocRows; r++ )
++    for ( r = 0; r < allocRows; r++ )
+     {
+         cells[r] = new RenderTableCell * [totalCols];
+         memset( cells[r], 0, totalCols * sizeof( RenderTableCell * ));

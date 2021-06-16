@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# This file is part of the KDE project
+# Copyright (C) 2002,2003 Paul Chitescu <paulc-devel@null.ro>
+# License: Open Source, Use On Your Own Risk
+#
+# Konqueror/Embedded MS Excel to HTML data filter
+#
+# Requires: sh, sed, xlhtml
+#
+# Usage: in your konq-embedrc file,
+#
+# [MIME Handlers]
+# application/vnd.ms-excel,.xls=|text/html|/path/to/this/file
+
+# you shouldn't need to change anything below
+case "$FILTER_URL" in
+file:/*)
+    xlhtml -fw -th `echo "$FILTER_URL" | sed 's,^file:,,'`
+    ;;
+*)
+    tmpf=/tmp/.konqe-dl-$$.xls
+    cat >$tmpf
+    xlhtml -fw -th $tmpf
+    rm $tmpf
+    ;;
+esac

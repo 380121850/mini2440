@@ -1,0 +1,20 @@
+--- ../../kdelibs/khtml/html/htmlparser.h	Sun Jun 10 04:48:35 2001
++++ ./kdesrc/khtml/html/htmlparser.h	Sun Oct  7 12:10:37 2001
+@@ -86,7 +86,7 @@ public:
+     bool parsingBody() const { return inBody; }
+ 
+     bool skipMode() const { return (discard_until != 0); }
+-    bool noSpaces() const { return (!_inline  || !inBody); }
++    bool noSpaces() const { return (!m_inline  || !inBody); }
+     bool selectMode() const { return inSelect; }
+ 
+     DOM::HTMLDocumentImpl *doc() const { return static_cast<DOM::HTMLDocumentImpl *>(document->document()); }
+@@ -157,7 +157,7 @@ protected:
+     // needed for broken HTML as: <center><frameset>... as the center element creates an implicit body
+     bool noRealBody;
+     bool haveFrameSet;
+-    bool _inline;
++    bool m_inline;
+     bool end;
+     bool flat;
+     bool haveKonqBlock;

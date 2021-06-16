@@ -1,0 +1,2 @@
+init: konqe_register_libksimplesound
+libs: libksimplesound_e.la

@@ -1,0 +1,11 @@
+--- ../../kdelibs/khtml/misc/helper.cpp	Thu Jul 26 22:48:06 2001
++++ ./kdesrc/khtml/misc/helper.cpp	Sun Oct  7 14:15:34 2001
+@@ -244,7 +244,7 @@ void khtml::setNamedColor(QColor &color,
+             if(!color.isValid()) {
+                 bool hasalpha = false;
+                 for(unsigned int i = 0; i < name.length(); i++)
+-                    if(name[i].isLetterOrNumber()) {
++                    if(name[(int)i].isLetterOrNumber()) {
+                         hasalpha = true;
+                         break;
+                     }

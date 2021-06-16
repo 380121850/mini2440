@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# This file is part of the KDE project
+# Copyright (C) 2002 Paul Chitescu <paulc-devel@null.ro>
+# License: Open Source, Use On Your Own Risk
+#
+# Generic 8-bit CGI GET query parameter extractor
+#
+# Requires: sh, awk
+#
+# Usage: cgiparam param_name, var=`cgiparam param_name`, etc.
+
+# set the decimal ASCII substitution code for null codes (%00)
+# comment the line if you can and want process null characters
+subst0=63
+
+# you shouldn't need to change anything below
+exec awk -v "name=$1" -v "subst0=$subst0" '
+BEGIN {
+  n=tolower(name);
+  if (n == "") exit;
+  tmp=ENVIRON["QUERY_STRING"];
+  gsub("&","?",tmp);
+  split(tmp,vars,"?");
+  for (v in vars) {
+    i=index(vars[v],"=");
+    if (i && (n == tolower(substr(vars[v],1,i-1)))) {
+      tmp=substr(vars[v],i+1);
+      gsub("+"," ",tmp);
+      b=1;
+      do {
+        i=match(substr(tmp,b),"%[[:xdigit:]][[:xdigit:]]");
+        if (i) {
+          i=i+b;
+	  b=i;
+          hex="0x" toupper(substr(tmp,i,2));
+	  hex=0+hex;
+	  if (subst0 && !hex) hex=subst0;
+	  tmp=sprintf("%s%c%s",substr(tmp,1,i-2),hex,substr(tmp,i+2));
+	}
+      } while (i);
+      print tmp;
+      exit;
+    }
+  }
+}'

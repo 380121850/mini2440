@@ -1,0 +1,10 @@
+[Desktop Entry]
+Exec=kflashplay %i %m -caption "%c"
+Icon=kflashplay
+MimeType=application/x-shockwave-flash;application/x-futuresplash
+X-KDE-NativeMimeType=application/x-shockwave-flash
+Type=Application
+Terminal=0
+DocPath=kflashplay/kflashplay.html
+Name=KFlashPlay
+Comment=A small Macromedia Flash player

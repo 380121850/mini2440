@@ -1,0 +1,6 @@
+/dev/modem 115200
+crtscts
+modem
+lock
+defaultroute
+usepeerdns

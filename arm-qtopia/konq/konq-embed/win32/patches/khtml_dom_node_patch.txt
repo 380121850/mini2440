@@ -1,0 +1,15 @@
+--- ../../kdelibs/khtml/dom/dom_node.h	Sun Mar 11 10:52:21 2001
++++ ./kdesrc/khtml/dom/dom_node.h	Sun Oct  7 11:41:11 2001
+@@ -760,8 +760,11 @@ protected:
+  * A DOMTimeStamp represents a number of milliseconds.
+  *
+  */
++#if defined(Q_WS_WIN)
++typedef unsigned long DOMTimeStamp;
++#else
+ typedef unsigned long long DOMTimeStamp;
+-
++#endif
+ 
+ }; //namespace
+ #endif

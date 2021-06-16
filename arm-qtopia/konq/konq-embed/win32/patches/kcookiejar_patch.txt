@@ -1,0 +1,52 @@
+--- ../../kdelibs/kio/http/kcookiejar/kcookiejar.cpp	Sun Sep  9 00:03:49 2001
++++ ./kdesrc/kio/http/kcookiejar/kcookiejar.cpp	Wed Oct 10 11:59:34 2001
+@@ -1123,23 +1123,23 @@ bool KCookieJar::loadCookies(const QStri
+             if ((line[0] == '#') || (line[0] == '['))
+                 continue;
+ 
+-            const char *host( parseField(line) );
+-            const char *domain( parseField(line) );
+-            const char *path( parseField(line) );
+-            const char *expStr( parseField(line) );
++            const char *host = parseField(line);
++            const char *domain = parseField(line);
++            const char *path = parseField(line);
++            const char *expStr = parseField(line);
+             if (!expStr) continue;
+             int expDate  = (time_t) strtoul(expStr, 0, 10);
+-            const char *verStr( parseField(line) );
++            const char *verStr = parseField(line);
+             if (!verStr) continue;
+             int protVer  = (time_t) strtoul(verStr, 0, 10);
+-            const char *name( parseField(line) );
++            const char *name = parseField(line);
+             bool keepQuotes = false;
+             if (protVer >= 100)
+             {
+                 protVer -= 100;
+                 keepQuotes = true;
+             }
+-            const char *value( parseField(line, keepQuotes) );
++            const char *value = parseField(line, keepQuotes);
+             bool secure = atoi( parseField(line) );
+ 
+             // Parse error
+@@ -1221,7 +1221,8 @@ void KCookieJar::loadConfig(KConfig *_co
+     domainSettings = _config->readListEntry("CookieDomainAdvice");
+ 
+     // Reset current domain settings first.
+-    for ( QStringList::Iterator it=domainList.begin(); it != domainList.end(); )
++    QStringList::Iterator it;
++    for ( it=domainList.begin(); it != domainList.end(); )
+     {
+          // Make sure to update iterator before calling setDomainAdvice()
+          // setDomainAdvice() might delete the domain from domainList.
+@@ -1230,7 +1231,7 @@ void KCookieJar::loadConfig(KConfig *_co
+     }
+ 
+     // Now apply the
+-    for ( QStringList::Iterator it=domainSettings.begin();
++    for ( it=domainSettings.begin();
+           it != domainSettings.end(); )
+     {
+         const QString &value = *it++;

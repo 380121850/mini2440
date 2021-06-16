@@ -1,0 +1,14 @@
+--- ../../kdelibs/khtml/xml/dom_stringimpl.cpp	Wed Jul 25 10:24:59 2001
++++ ./kdesrc/khtml/xml/dom_stringimpl.cpp	Sun Oct  7 14:48:10 2001
+@@ -223,9 +223,9 @@ QList<Length> *DOMStringImpl::toLengthLi
+     // ### what about "auto" ?
+     QChar space(' ');
+     for(unsigned int i=0; i < l; i++) {
+-        char cc = str[i].latin1();
++        char cc = str[(int)i].latin1();
+         if ( cc > '9' || ( cc < '0' && cc != '-' && cc != '*' && cc != '%' && cc != '.') )
+-            str[i] = space;
++            str[(int)i] = space;
+     }
+     str = str.simplifyWhiteSpace();
+ 

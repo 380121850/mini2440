@@ -1,0 +1,14 @@
+--- ../../kdelibs/khtml/dom/html_document.cpp	Sun Jul 15 21:57:09 2001
++++ ./kdesrc/khtml/dom/html_document.cpp	Sun Oct  7 12:02:07 2001
+@@ -203,7 +203,11 @@ DOMString HTMLDocument::cookie() const
+ 
+ void HTMLDocument::setCookie( const DOMString & value )
+ {
++#if defined(Q_WS_WIN)
++    long windowId = 0;
++#else
+     long windowId = view()->winId();
++#endif
+     QByteArray params;
+     QDataStream stream(params, IO_WriteOnly);
+     QString fake_header("Set-Cookie: ");

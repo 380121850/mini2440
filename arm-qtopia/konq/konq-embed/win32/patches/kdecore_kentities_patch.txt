@@ -1,0 +1,13 @@
+--- ../../kdelibs/kdecore/kentities.c	Tue Mar 13 05:26:19 2001
++++ ./kdesrc/kdecore/kentities.c	Sun Oct  7 15:46:34 2001
+@@ -104,6 +104,10 @@ hash_Entity (register const char *str, r
+ 
+ #ifdef __GNUC__
+ __inline
++#else
++#ifdef __cplusplus
++inline
++#endif
+ #endif
+ const struct entity *
+ findEntity (register const char *str, register unsigned int len)

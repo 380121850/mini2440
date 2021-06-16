@@ -1,0 +1,18 @@
+--- ../../kdelibs/kdecore/kcharsets.cpp	Thu Aug 30 21:19:17 2001
++++ ./kdesrc/kdecore/kcharsets.cpp	Sat Oct  6 12:52:13 2001
+@@ -258,9 +258,12 @@ void KCharsetsPrivate::getAvailableChars
+     }
+ 
+     // sort lists to avoid "Arial Black" being found before "Arial"
+-    for( QMap<QFont::CharSet, QStrList >::Iterator it = availableCharsets->begin();
+-         it != availableCharsets->end(); ++it )
+-        it.data().sort();
++    // MSVC++ is stupid!! it can't handle for ( type var; ... ) if var is already
++    // declared.
++    QMap<QFont::CharSet, QStrList >::Iterator _it;
++    for( _it = availableCharsets->begin();
++         _it != availableCharsets->end(); ++_it )
++        _it.data().sort();
+ 
+ #if 0
+     for( QMap<QFont::CharSet, QValueList<QCString> >::Iterator it = availableCharsets->begin();

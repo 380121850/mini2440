@@ -1,0 +1,107 @@
+<!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
+<kpartgui name="konqe" version="1">
+<Create>
+ <Action name="file_new" stdAction="true" icon="filenew.png"/>
+ <Action name="file_open" stdAction="true" icon="@konq_largeicons@fileopen.png"/>
+ <Action name="file_save" stdAction="true" icon="@konq_largeicons@filesave.png"/>
+ <Action name="file_save_as" stdAction="true" icon="@konq_largeicons@filesaveas.png"/>
+ <Action name="file_print" stdAction="true" icon="@konq_largeicons@fileprint.png"/>
+ <Action name="go_home" stdAction="true" icon="@konq_largeicons@gohome.png"/>
+ <Action name="go_back" stdAction="true" icon="@konq_largeicons@back.png"/>
+ <Action name="go_forward" stdAction="true" icon="@konq_largeicons@forward.png"/>
+ <Action name="edit_undo" stdAction="true" icon="@konq_largeicons@undo.png"/>
+ <Action name="edit_redo" stdAction="true" icon="@konq_largeicons@redo.png"/>
+ <Action name="edit_cut" stdAction="true" icon="@konq_largeicons@editcut.png"/>
+ <Action name="edit_copy" stdAction="true" icon="@konq_largeicons@editcopy.png"/>
+ <Action name="edit_paste" stdAction="true" icon="@konq_largeicons@editpaste.png"/>
+ <Action name="edit_find" stdAction="true" icon="find.png"/>
+ <Action name="view_redisplay" stdAction="true" icon="@konq_largeicons@reload.png"/>
+ <Action name="view_zoom" stdAction="true" popupMenu="true" icon="@konq_largeicons@viewmag.png"/>
+ <Action name="bookmark_add" stdAction="true" icon="bookmark_add.png"/>
+ <Action name="bookmark_edit" stdAction="true" accel="" icon="bookmark.png"/>
+ <Action name="options_configure" stdAction="true" icon="configure.png"/>
+</Create>
+<Create>
+ <Action name="windows" popupMenu="true" icon="@konq_largeicons@window_list.png">
+  <text>Windows List</text>
+ </Action>
+ <Action name="view_close" accel="Ctrl+W" icon="fileclose.png">
+  <text>Close View</text>
+ </Action>
+ <Action name="view_next" accel="Ctrl+Tab" icon="2rightarrow.png">
+  <text>Next View</text>
+ </Action>
+ <Action name="view_autoload_images" toggle="true">
+  <text>Autoload Images</text>
+ </Action>
+ <Action name="go_stop" icon="@konq_largeicons@stop.png">
+  <text>Stop Loading</text>
+ </Action>
+ <Action name="info_security" icon="@konq_largeicons@lock.png">
+  <text>Show Security Information</text>
+ </Action>
+ <Action name="options_show_location" accel="F11" toggle="true">
+  <text>Show Location Bar</text>
+ </Action>
+ <Action name="options_show_sidebar" accel="F12" toggle="true">
+  <text>Show Side Bar</text>
+ </Action>
+ <Action name="options_show_statusbar" stdAction="true" accel="F10"/>
+ <Action name="main_menu" popupMenu="true" icon="@konq_largeicons@gear.png">
+  <text>Main Menu</text>
+ </Action>
+ <Action name="view_load_images" icon="@konq_largeicons@images_display.png">
+  <text>Load Images</text>
+ </Action>
+</Create>
+<Menu name="main_menu">
+ <Action name="file_new"/>
+ <Separator/>
+ <Action name="view_autoload_images"/>
+ <Action name="options_show_statusbar"/>
+ <Action name="options_show_location"/>
+ <Action name="options_show_sidebar"/>
+ <Separator/>
+ <Action name="edit_find"/>
+ <Separator/>
+ <Action name="options_configure"/>
+ <Separator/>
+ <Action name="bookmark_add"/>
+ <Action name="bookmark_edit"/>
+ <Action name="bookmarks"/>
+ <Separator/>
+ <Action name="view_next"/>
+ <Action name="view_close"/>
+</Menu>
+<ToolBar name="main_bar">
+ <Action name="main_menu"/>
+ <ToolBar name="browser_bar"/>
+ <ToolBar name="edit_bar"/>
+ <Spacer/>
+ <Action name="windows"/>
+</ToolBar>
+<ToolBar name="browser_bar" newline="true">
+ <Action name="file_print"/>
+ <Action name="go_back"/>
+ <Action name="go_forward"/>
+ <Action name="go_home"/>
+ <Action name="view_redisplay"/>
+ <Action name="go_stop"/>
+ <Separator/>
+ <Action name="info_security"/>
+ <Action name="view_zoom"/>
+ <Action name="view_load_images"/>
+</ToolBar>
+<ToolBar name="edit_bar" newline="true">
+ <Action name="file_open"/>
+ <Action name="file_save"/>
+ <Action name="file_save_as"/>
+ <Action name="file_print"/>
+ <Separator/>
+ <Action name="edit_undo"/>
+ <Action name="edit_redo"/>
+ <Action name="edit_cut"/>
+ <Action name="edit_copy"/>
+ <Action name="edit_paste"/>
+</ToolBar>
+</kpartgui>

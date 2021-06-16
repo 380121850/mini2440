@@ -1,0 +1,15 @@
+--- ../../kdelibs/khtml/html/htmltokenizer.cpp	Wed Aug 22 18:24:54 2001
++++ ./kdesrc/khtml/html/htmltokenizer.cpp	Sun Oct  7 12:14:20 2001
+@@ -1122,10 +1122,12 @@ void HTMLTokenizer::addPending()
+ 
+         case TabPending:
+             p = TAB_SIZE - ( prePos % TAB_SIZE );
++	    {
+             for ( int x = 0; x < p; x++ )
+             {
+                 *dest = QChar(' ');
+                 dest++;
++		}
+             }
+             prePos += p;
+             break;

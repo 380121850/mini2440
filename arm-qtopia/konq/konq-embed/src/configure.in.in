@@ -1,0 +1,82 @@
+AC_MSG_CHECKING([for which gui to use])
+ 
+ac_konqe_gui="x11"
+ 
+if test -n "$LIB_QTOPIA"; then
+    ac_konqe_gui="qpe";
+fi
+ 
+AC_ARG_WITH(gui,[  --with-gui=TYPE         where TYPE can be of x11, qpe or kiosk. default is x11],
+            [ ac_konqe_gui="$withval" ])
+ 
+ 
+if test -z "$LIB_QTOPIA" && test "x$ac_konqe_gui" = "xqpe"; then
+    AC_MSG_RESULT([qpe gui requested but no Qtopia found, falling back to x11]);
+else
+    AC_MSG_RESULT([$ac_konqe_gui])
+fi
+ 
+case $ac_konqe_gui in
+        x11)
+                AC_DEFINE_UNQUOTED(KONQ_GUI_X11, 1, [use x11 gui])
+                ;;
+        qpe)
+                AC_DEFINE_UNQUOTED(KONQ_GUI_QPE, 1, [use qpe gui])
+                ;;
+        kiosk)
+                AC_DEFINE_UNQUOTED(KONQ_GUI_KIOSK, 1, [use kiosk gui])
+                ;;
+        *)
+                AC_MSG_ERROR([Unknown GUI type '$1' specified.])
+                ;;
+esac
+
+AC_ARG_ENABLE(bookmarks,[  --disable-bookmarks     Disable XBel bookmark support],
+              want_bookmarks=$enableval,want_bookmarks=yes)
+ 
+if test "x$want_bookmarks" = "xyes"; then
+    AC_DEFINE_UNQUOTED(ENABLE_BOOKMARKS, 1, [Defined if bookmark support is enabled])
+fi
+
+AC_ARG_ENABLE(sidebar,[  --enable-sidebar        Enable sidebar support],
+              want_sidebar=$enableval,want_sidebar=no)
+if test "x$want_sidebar" = "xyes"; then
+    AC_DEFINE_UNQUOTED(ENABLE_SIDEBAR, 1, [Defined if local sidebar support is enabled])
+fi
+
+AC_ARG_ENABLE(xmlui,[  --enable-xmlui          Enable XML user interface],
+              want_xmlui=$enableval,want_xmlui=no)
+AM_CONDITIONAL(XMLUI, test "x$want_xmlui" = "xyes")
+if test "x$want_xmlui" = "xyes"; then
+    AC_DEFINE_UNQUOTED(ENABLE_XMLUI, 1, [Defined if user interface comes from a XML file])
+fi
+
+AC_ARG_ENABLE(cmdoptions,[  --disable-cmdoptions    Disable command line options],
+              want_cmdoptions=$enableval,want_cmdoptions=yes)
+if test "x$want_cmdoptions" = "xyes"; then
+    AC_DEFINE_UNQUOTED(PARSE_CMDLINE, 1, [Defined if command line options are parsed])
+fi
+
+AC_ARG_ENABLE(fontsubs,[  --enable-fontsubs       Enable font substitution],
+              want_fontsubs=$enableval,want_fontsubs=no)
+if test "x$want_fontsubs" = "xyes"; then
+    AC_DEFINE_UNQUOTED(ENABLE_FONTSUBS, 1, [Defined if font substitution is enabled])
+fi
+
+AC_ARG_ENABLE(largeicons,[  --enable-largeicons     Use large icons in toolbar],
+              want_largeicons=$enableval,want_largeicons=no)
+AM_CONDITIONAL(LARGEICONS, test "x$want_largeicons" = "xyes")
+if test "x$want_largeicons" = "xyes"; then
+    AC_DEFINE_UNQUOTED(USE_LARGE_ICONS, 1, [Defined if large icons are used in toolbar])
+    konq_largeicons=big/
+else
+    konq_largeicons=
+fi
+AC_SUBST(konq_largeicons)
+
+AC_ARG_ENABLE(jshostext,[  --enable-jshostext      Allow for JavaScript extensions],
+              want_jshostext=$enableval,want_jshostext=no)
+AM_CONDITIONAL(JS_HOSTEXTEND, test "x$want_jshostext" = "xyes")
+if test "x$want_jshostext" = "xyes"; then
+    AC_DEFINE_UNQUOTED(ENABLE_JS_HOSTEXTEND, 1, [Defined if JavaScript can be extended])
+fi

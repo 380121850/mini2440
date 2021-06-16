@@ -1,0 +1,79 @@
+#!/bin/sh
+
+case "$1" in
+    list)
+	cat /etc/ppp/*-secrets | sort | uniq | awk '$4 == "*" { printf("L %s %s\n",$1,$2); } END { printf("L \n"); }'
+	exit 0
+	;;
+    wakeup)
+	pid=`pidof konqueror | awk '{ pid=$1; for(i=2;i<=NF;i++) {if(pid > $i) pid=$i;} print pid; exit;}'`
+	test -n "$pid" && exec kill -USR1 "$pid" >/dev/null 2>&1
+	exit 1
+	;;
+esac
+
+modem="/dev/modem"
+
+unset ispppon ischaton isifup
+if [ -n "`pidof pppd`" ]; then
+    ispppon=1
+    ifconfig ppp0 >/dev/null 2>&1 && isifup=1
+fi
+
+test -n "`pidof chat`" && ischaton=1
+
+if [ "$ispppon" ]; then
+    if [ "$isifup" ]; then
+	s1=`ifconfig ppp0 | awk '$1 == "inet" {
+split($2,tmp,":");
+printf("<tr><td>Address</td><td colspan=\"2\">%s</td></tr>",tmp[2]);
+split($3,tmp,":");
+printf("<tr><td>Remote</td><td colspan=\"2\">%s</td></tr>",tmp[2]); }'`
+	s2=`pppstats | awk '$1 != "IN" {
+printf("<tr><td>Input</td><td>%s b</td><td>%s pkt</td></tr>",$1,$2);
+printf("<tr><td>Output</td><td>%s b</td><td>%s pkt</td></tr>",$7,$8); }'`
+	status="E <table cellspacing=\"0\" cellpadding=\"0\">${s1}${s2}</table>"
+	unset s1 s2
+    else
+	if [ "$ischaton" ]; then
+	    status="C Modem Dialing"
+	else
+	    status="C Negotiating"
+	fi
+    fi
+else
+    status="N Not Connected"
+fi
+
+case "$1" in
+    connect)
+	if [ "$ispppon" ]; then
+	    echo "$status"
+	    exit 1
+	fi
+	user=`echo "$2" | sed 's/ .*$//'`
+	prov=`echo "$2" | sed 's/^.* //'`
+	echo "C Connecting as $user to $prov..."
+	(pppd updetach logfd 2 user "$user" call "$prov" </dev/null 2>&1; sleep 1; exec $0 status) &
+	;;
+    disconnect)
+	if [ ! "$ispppon" ]; then
+	    echo "$status"
+	    exit 1
+	fi
+	echo "C Terminating PPP..."
+	(killall -HUP chat || killall -HUP pppd) >/dev/null 2>&1
+	sleep 1
+	echo "C Hanging up modem..."
+	echo -n "+++" >$modem
+	sleep 1
+	echo "ATH" >$modem
+	echo "N Disconnected"
+	;;
+    status)
+	echo "$status"
+	;;
+    *)
+	echo "? Internal Error"
+	;;
+esac

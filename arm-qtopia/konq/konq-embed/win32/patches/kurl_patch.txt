@@ -1,0 +1,15 @@
+--- ../../kdelibs/kdecore/kurl.cpp	Thu Jul 19 09:42:41 2001
++++ ./kdesrc/kdecore/kurl.cpp	Sat Oct  6 19:00:42 2001
+@@ -875,10 +875,10 @@ bool KURL::isParentOf( const KURL& _u ) 
+         return false; // can't work with implicit paths
+ 
+     QString p1( cleanpath( path() ) );
+-    if ( p1[p1.length()-1] != '/' )
++    if ( p1[(int)p1.length()-1] != '/' )
+         p1 += '/';
+     QString p2( cleanpath( _u.path() ) );
+-    if ( p2[p2.length()-1] != '/' )
++    if ( p2[(int)p2.length()-1] != '/' )
+         p2 += '/';
+ 
+     //kdDebug(126) << "p1=" << p1 << endl;

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Comment=A Web Browser
+Exec=konqueror
+Icon=konqueror
+Type=Application
+Name=Web Browser
+MimeType=text/html

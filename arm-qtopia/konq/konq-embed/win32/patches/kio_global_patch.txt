@@ -1,0 +1,26 @@
+--- ../../kdelibs/kio/global.h	Thu Apr 19 21:37:33 2001
++++ ./kdesrc/kio/global.h	Sun Oct  7 12:16:38 2001
+@@ -50,7 +50,11 @@ namespace KIO
+    *
+    * ### KDE 3.0: remove 64 suffix (for now it's needed to not break SC)
+    */
++#if defined(Q_WS_WIN)
++  QString convertSize64( long size );
++#else
+   QString convertSize64( long long size );
++#endif
+ 
+   /**
+    * Convert size from kilo-bytes to the string representation.
+@@ -89,7 +93,11 @@ namespace KIO
+    *
+    * ### KDE 3.0: remove 64 suffix (for now it's needed to not break SC)
+    */
++#if defined(Q_WS_WIN)
++  QString itemsSummaryString64(uint items, uint files, uint dirs, long size, bool showSize);
++#else
+   QString itemsSummaryString64(uint items, uint files, uint dirs, long long size, bool showSize);
++#endif
+ 
+   /**
+    * Encode (from the text displayed to the real filename)

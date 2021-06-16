@@ -1,0 +1,25 @@
+--- ./kcharsets.cpp	Thu Aug 30 22:19:17 2001
++++ ./kcharsets.cpp	Wed Aug 21 17:46:53 2002
+@@ -464,6 +464,11 @@
+ {
+     QStringList families;
+     QStrList chFamilies = (*d->availableCharsets)[ch];
++
++    // list Unicode as available if nothing else found
++    if ( ( (int)ch != QFont::Unicode ) && chFamilies.isEmpty() )
++	chFamilies = (*d->availableCharsets)[QFont::Unicode];
++
+     for ( unsigned i = 0; i < chFamilies.count(); ++i )
+ 	families.append( QString::fromLatin1( chFamilies.at( i ) ) );
+ 
+@@ -693,6 +698,10 @@
+ QFont::CharSet KCharsets::xNameToID(QString name) const
+ {
+     name = name.lower();
++
++    // fix this stone age problem
++    if ( name == "iso10646" )
++	name = xNames[0];
+ 
+     // try longest names first, then shorter ones
+     // to avoid that iso-8859-10 matches iso-8859-1

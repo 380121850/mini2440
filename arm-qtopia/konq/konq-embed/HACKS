@@ -1,0 +1,34 @@
+
+Yes, there are a couple of ugly hacks ;-) . Actually they should be hidden
+somewhere deep, but I decided to mention some of them here, as they
+have a reason and rely on certain dependencies, to solve some problems.
+
+- kdummyprinter: In case QT_NO_PRINTER is defined we have to provide
+  some sort of dummy replacement for QPrinter, just to get the code
+  compiling. The actual code will never be called (as we don't print
+  in konq/e) , so maybe even a good compiler could optimize away some
+  of the stuff. That's why kdummyprinter.h defines an empty QPrinter,
+  just for khtmlview.cpp .
+
+- kfontdatabase: The QPE qt config defines QT_NO_FONTDATABASE, so we
+  somehow have to get things working without this class. There are
+  only two places where this class is used, that's kcharsets (see
+  item below) and khtml/css/csshelper.cpp:setFontSize . The former
+  case is fairly easy to solve, the latter though is more difficult
+  as QFontDataBase is instantiated directly there.
+  Fortunately only two methods are called in there, that's
+  isSmoothlyScalable and smoothSizes. 
+  According to Warwick 
+  (http://www.geocrawler.com/lists/3/SourceForge/10638/0/5908518/)
+  this function returns true anyway on Qt/Embedded, so we just
+  provide this dummy drop-in replacement hack :-)
+
+- kcharsets:
+  There are two issues with this class. Firstly it uses QFontDataBase
+  and secondly it uses QTextCodec::loadCharmapFile , which is not
+  available when QT_NO_CODECS is defined (which is the case in the
+  QPE qt config) . These two reaons are why we provide a forked
+  and hacked kcharsets implementation in case QT_NO_FONTDATABASE
+  and QT_NO_CODECS are defined (otherwise we just #include the
+  real implementation ;-)
+

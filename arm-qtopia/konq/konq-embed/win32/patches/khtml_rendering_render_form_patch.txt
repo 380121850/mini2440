@@ -1,0 +1,33 @@
+--- ../../kdelibs/khtml/rendering/render_form.cpp	Thu Aug 16 22:12:26 2001
++++ ./kdesrc/khtml/rendering/render_form.cpp	Sun Oct  7 14:38:41 2001
+@@ -413,8 +413,8 @@ void RenderSubmitButton::calcMinMaxWidth
+     value = value.stripWhiteSpace();
+     QString raw;
+     for(unsigned int i = 0; i < value.length(); i++) {
+-        raw += value[i];
+-        if(value[i] == '&')
++        raw += value[(int)i];
++        if(value[(int)i] == '&')
+             raw += '&';
+     }
+ 
+@@ -952,7 +952,7 @@ void RenderSelect::layout( )
+     QArray<HTMLGenericFormElementImpl*> listItems = select->listItems();
+     bool foundOption = false;
+     for (uint i = 0; i < listItems.size() && !foundOption; i++)
+-	foundOption = (listItems[i]->id() == ID_OPTION);
++	foundOption = (listItems[(int)i]->id() == ID_OPTION);
+ 
+     if (!foundOption)
+ 	m_widget->setEnabled(false);
+@@ -1026,8 +1026,8 @@ void RenderSelect::slotSelectionChanged(
+     for ( unsigned i = 0; i < listItems.count(); i++ )
+         // don't use setSelected() here because it will cause us to be called
+         // again with updateSelection.
+-        if ( listItems[i]->id() == ID_OPTION )
+-            static_cast<HTMLOptionElementImpl*>( listItems[i] )
++        if ( listItems[(int)i]->id() == ID_OPTION )
++            static_cast<HTMLOptionElementImpl*>( listItems[(int)i] )
+                 ->m_selected = static_cast<KListBox*>( m_widget )->isSelected( i );
+ 
+     static_cast<HTMLSelectElementImpl*>(m_element)->onChange();

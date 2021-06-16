@@ -1,0 +1,41 @@
+--- ../../kdelibs/kio/http/http.cc	Fri Sep  7 20:25:53 2001
++++ ./kdesrc/kio/http/http.cc	Tue Oct  9 22:53:13 2001
+@@ -2561,11 +2561,12 @@ FILE* HTTPProtocol::checkCacheEntry( boo
+    CEF = host + CEF + ':';
+ 
+    QString dir = m_strCacheDir;
+-   if (dir[dir.length()-1] != '/')
++   if (dir[(int)dir.length()-1] != '/')
+       dir += "/";
+ 
+    int l = host.length();
+-   for(int i = 0; i < l; i++)
++   int i;
++   for(i = 0; i < l; i++)
+    {
+       if (host[i].isLetter() && (host[i] != 'w'))
+       {
+@@ -2573,12 +2574,12 @@ FILE* HTTPProtocol::checkCacheEntry( boo
+          break;
+       }
+    }
+-   if (dir[dir.length()-1] == '/')
++   if (dir[(int)dir.length()-1] == '/')
+       dir += "0";
+ 
+    unsigned long hash = 0x00000000;
+    QCString u = m_request.url.url().latin1();
+-   for(int i = u.length(); i--;)
++   for(i = u.length(); i--;)
+    {
+       hash = (hash * 12211 + u[i]) % 2147483563;
+    }
+@@ -2828,7 +2829,7 @@ void HTTPProtocol::cleanCache()
+    const time_t maxAge = DEFAULT_CLEAN_CACHE_INTERVAL; // 30 Minutes.
+    bool doClean = false;
+    QString cleanFile = m_strCacheDir;
+-   if (cleanFile[cleanFile.length()-1] != '/')
++   if (cleanFile[(int)cleanFile.length()-1] != '/')
+       cleanFile += "/";
+    cleanFile += "cleaned";
+ 

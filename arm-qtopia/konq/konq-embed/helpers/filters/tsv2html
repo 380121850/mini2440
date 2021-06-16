@@ -1,0 +1,61 @@
+#!/bin/awk -f
+
+# This file is part of the KDE project
+# Copyright (C) 2002,2003 Paul Chitescu <paulc-devel@null.ro>
+# License: Open Source, Use On Your Own Risk
+#
+# Konqueror/Embedded Tab Separated Values to HTML data filter
+#
+# Requires: awk
+#
+# Usage: in your konq-embedrc file,
+#
+# [MIME Handlers]
+# text/tab-separated-values,.tsv=|text/html|/path/to/this/file
+
+BEGIN {
+    FS="\t";
+    maxf=0;
+}
+
+{
+    gsub("\r*$","");
+    if (maxf < NF) maxf = NF;
+    data[NR]=$0;
+}
+
+END {
+    print "<HTML><HEAD>"
+    print "<STYLE TYPE=\"text/css\"><!--"
+    print "TABLE { border: thin; border-collapse: collapse }"
+    print "--> </STYLE>"
+    print "</HEAD><BODY>"
+    print "<TABLE BORDER=1 CELLSPACING=0 CELLPADDING=3><TR><TH>\\</TH>"
+    for (i=0; i<maxf; i++)
+    {
+	if (i<26)
+	    tmp=sprintf("%c",i+65);
+	else
+	    tmp=sprintf("%c%c",(i/26)+64,(i%26)+65);
+	printf("<TH>%s</TH>",tmp);
+    }
+    print "</TR>"
+
+    for (j=1; j<=NR; j++)
+    {
+	printf("<TR><TH>%d</TH>\n",j);
+	split(data[j],vals,"\t");
+	for (i=1; i<=maxf; i++)
+	{
+	    tmp=vals[i];
+	    gsub("&","\\&amp;",tmp);
+	    gsub("\"","\\&quot;",tmp);
+	    gsub("<","\\&lt;",tmp);
+	    gsub(">","\\&gt;",tmp);
+	    printf("<TD>%s</TD>",tmp);
+	}
+	print "</TR>"
+    }
+    print "</TABLE>"
+    print "</BODY></HTML>"
+}

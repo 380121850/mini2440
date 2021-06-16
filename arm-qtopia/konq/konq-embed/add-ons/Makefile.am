@@ -1,0 +1,2 @@
+SUBDIRS = @ADD_ON_DIRS@
+KDE_OPTIONS = qtonly

@@ -1,0 +1,6 @@
+[Desktop Entry]
+MimeType=application/x-wav
+ServiceTypes=KParts/ReadOnlyPart
+X-KDE-Library=libksimplesound
+Type=Service
+Name=Embedded Sound Player

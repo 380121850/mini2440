@@ -1,0 +1,94 @@
+--- ../../kdelibs/khtml/khtml_pagecache.cpp	Sat May 26 01:07:10 2001
++++ ./kdesrc/khtml/khtml_pagecache.cpp	Sun Oct  7 22:49:51 2001
+@@ -143,6 +143,7 @@ KHTMLPageCache::~KHTMLPageCache()
+ long
+ KHTMLPageCache::createCacheEntry()
+ {
++#if !defined(Q_WS_WIN)
+   KHTMLPageCacheEntry *entry = new KHTMLPageCacheEntry(d->newId);
+   d->dict.insert(d->newId, entry);
+   d->expireQueue.append(entry);
+@@ -152,12 +153,16 @@ KHTMLPageCache::createCacheEntry()
+      d->dict.remove(entry->m_id);
+      delete entry;
+   }
++#endif
+   return (d->newId++);
+ }
+ 
+ void
+ KHTMLPageCache::addData(long id, const QByteArray &data)
+ {
++#if defined(Q_WS_WIN)
++  return;
++#endif
+   KHTMLPageCacheEntry *entry = d->dict.find(id);
+   if (entry)
+      entry->addData(data);
+@@ -166,6 +171,9 @@ KHTMLPageCache::addData(long id, const Q
+ void
+ KHTMLPageCache::endData(long id)
+ {
++#if defined(Q_WS_WIN)
++  return;
++#endif
+   KHTMLPageCacheEntry *entry = d->dict.find(id);
+   if (entry)
+      entry->endData();
+@@ -174,6 +182,9 @@ KHTMLPageCache::endData(long id)
+ void
+ KHTMLPageCache::cancelEntry(long id)
+ {
++#if defined(Q_WS_WIN)
++  return;
++#endif
+   KHTMLPageCacheEntry *entry = d->dict.take(id);
+   if (entry)
+   {
+@@ -185,15 +196,20 @@ KHTMLPageCache::cancelEntry(long id)
+ bool
+ KHTMLPageCache::isValid(long id)
+ {
++#if !defined(Q_WS_WIN)
+   KHTMLPageCacheEntry *entry = d->dict.find(id);
+   if (entry)
+      return entry->isValid();
++#endif
+   return false;
+ }
+ 
+ void
+ KHTMLPageCache::fetchData(long id, QObject *recvObj, const char *recvSlot)
+ {
++#if defined(Q_WS_WIN)
++  return;
++#endif
+   KHTMLPageCacheEntry *entry = d->dict.find(id);
+   if (!entry) return;
+ 
+@@ -212,6 +228,9 @@ KHTMLPageCache::fetchData(long id, QObje
+ void
+ KHTMLPageCache::cancelFetch(QObject *recvObj)
+ {
++#if defined(Q_WS_WIN)
++  return;
++#endif
+   KHTMLPageCacheDelivery *next;
+   for(KHTMLPageCacheDelivery* delivery = d->delivery.first();
+       delivery;
+@@ -266,6 +285,7 @@ KHTMLPageCache::sendData()
+ void
+ KHTMLPageCache::saveData(long id, QDataStream *str)
+ {
++#if !defined(Q_WS_WIN)
+   KHTMLPageCacheEntry *entry = d->dict.find(id);
+   assert(entry);
+ 
+@@ -294,6 +314,7 @@ KHTMLPageCache::saveData(long id, QDataS
+         str->writeRawBytes(buf, n);
+      }
+   }
++#endif
+ }
+ 
+ KHTMLPageCacheDelivery::~KHTMLPageCacheDelivery()

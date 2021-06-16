@@ -1,0 +1,11 @@
+configure.in.in
+./konq-embed/add-ons/configure.in.in
+./konq-embed/configure.in.in
+./konq-embed/dropin/configure.in.in
+./konq-embed/dropin/kio/configure.in.in
+./konq-embed/dropin/kssl/configure.in.in
+./konq-embed/ipkg/configure.in.in
+./konq-embed/kdesrc/kdecore/configure.in.in
+./konq-embed/kdesrc/kjs/configure.in.in
+./konq-embed/src/actions/configure.in.in
+./konq-embed/src/configure.in.in

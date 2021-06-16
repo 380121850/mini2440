@@ -1,0 +1,31 @@
+<!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
+<kpartgui name="kplaintextpart" version="1">
+<MenuBar>
+  <Menu name="file"><text>&amp;File</text>
+    <Action name="file_open"/>
+    <Separator/>
+    <Action name="file_save"/>
+    <Action name="file_save_as"/>
+  </Menu>
+  <Menu name="edit"><text>&amp;Edit</text>
+    <Action name="edit_undo"/>
+    <Action name="edit_redo"/>
+    <Separator/>
+    <Action name="edit_cut"/>
+    <Action name="edit_copy"/>
+    <Action name="edit_paste"/>
+    <Action name="edit_select_all"/>
+  </Menu>
+</MenuBar>
+<ToolBar name="mainToolBar">
+  <Action name="file_open"/>
+  <Action name="file_save"/>
+  <Action name="file_print"/>
+  <Separator/>
+  <Action name="edit_undo"/>
+  <Action name="edit_redo"/>
+  <Action name="edit_cut"/>
+  <Action name="edit_copy"/>
+  <Action name="edit_paste"/>
+</ToolBar>
+</kpartgui>

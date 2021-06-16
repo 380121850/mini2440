@@ -1,0 +1,13 @@
+AC_ARG_ENABLE(readwrite,[  --enable-readwrite      Enable support for Read/Write KParts],
+              want_readwrite=$enableval,want_readwrite=no)
+if test "x$want_readwrite" = "xyes"; then
+    AC_DEFINE(ENABLE_READWRITE, 1, [Defined if we support KParts::ReadWritePart])
+fi
+AM_CONDITIONAL(ENABLE_READWRITE, test "x$want_readwrite" = "xyes")
+
+AC_ARG_ENABLE(printing,[  --enable-printing       Enable printing support],
+              want_printing=$enableval,want_printing=no)
+if test "x$want_printing" = "xyes"; then
+    AC_DEFINE(ENABLE_PRINTING, 1, [Defined if we want printing support])
+fi
+AM_CONDITIONAL(ENABLE_PRINTING, test "x$want_printing" = "xyes")

@@ -1,0 +1,380 @@
+<!DOCTYPE UI><UI>
+<class>BookmarkEditorBase</class>
+<author>Simon Hausmann &lt;simon@kde.org&gt;</author>
+<widget>
+    <class>QDialog</class>
+    <property stdset="1">
+        <name>name</name>
+        <cstring>BookmarkEditorBase</cstring>
+    </property>
+    <property stdset="1">
+        <name>geometry</name>
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>283</width>
+            <height>299</height>
+        </rect>
+    </property>
+    <property stdset="1">
+        <name>caption</name>
+        <string>Edit Bookmarks</string>
+    </property>
+    <grid>
+        <property stdset="1">
+            <name>margin</name>
+            <number>11</number>
+        </property>
+        <property stdset="1">
+            <name>spacing</name>
+            <number>6</number>
+        </property>
+        <widget row="0"  column="0"  rowspan="1"  colspan="3" >
+            <class>QFrame</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>Frame4</cstring>
+            </property>
+            <property stdset="1">
+                <name>frameShape</name>
+                <enum>StyledPanel</enum>
+            </property>
+            <property stdset="1">
+                <name>frameShadow</name>
+                <enum>Raised</enum>
+            </property>
+            <property>
+                <name>layoutMargin</name>
+            </property>
+            <hbox>
+                <property stdset="1">
+                    <name>margin</name>
+                    <number>6</number>
+                </property>
+                <property stdset="1">
+                    <name>spacing</name>
+                    <number>6</number>
+                </property>
+                <widget>
+                    <class>QToolButton</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>newBookmarkButton</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>sizePolicy</name>
+                        <sizepolicy>
+                            <hsizetype>5</hsizetype>
+                            <vsizetype>5</vsizetype>
+                        </sizepolicy>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string></string>
+                    </property>
+                    <property stdset="1">
+                        <name>pixmap</name>
+                        <pixmap>image0</pixmap>
+                    </property>
+                    <property stdset="1">
+                        <name>autoRaise</name>
+                        <bool>true</bool>
+                    </property>
+                </widget>
+                <widget>
+                    <class>QToolButton</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>editBookmarkButton</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>sizePolicy</name>
+                        <sizepolicy>
+                            <hsizetype>5</hsizetype>
+                            <vsizetype>5</vsizetype>
+                        </sizepolicy>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string></string>
+                    </property>
+                    <property stdset="1">
+                        <name>pixmap</name>
+                        <pixmap>image1</pixmap>
+                    </property>
+                    <property stdset="1">
+                        <name>autoRaise</name>
+                        <bool>true</bool>
+                    </property>
+                </widget>
+                <widget>
+                    <class>QToolButton</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>deleteBookmarkButton</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>sizePolicy</name>
+                        <sizepolicy>
+                            <hsizetype>5</hsizetype>
+                            <vsizetype>5</vsizetype>
+                        </sizepolicy>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string></string>
+                    </property>
+                    <property stdset="1">
+                        <name>pixmap</name>
+                        <pixmap>image2</pixmap>
+                    </property>
+                    <property stdset="1">
+                        <name>autoRaise</name>
+                        <bool>true</bool>
+                    </property>
+                </widget>
+                <widget>
+                    <class>Line</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>Line1</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>orientation</name>
+                        <enum>Vertical</enum>
+                    </property>
+                </widget>
+                <widget>
+                    <class>QToolButton</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>moveUpButton</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>sizePolicy</name>
+                        <sizepolicy>
+                            <hsizetype>5</hsizetype>
+                            <vsizetype>5</vsizetype>
+                        </sizepolicy>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string></string>
+                    </property>
+                    <property stdset="1">
+                        <name>pixmap</name>
+                        <pixmap>image3</pixmap>
+                    </property>
+                    <property stdset="1">
+                        <name>autoRaise</name>
+                        <bool>true</bool>
+                    </property>
+                </widget>
+                <widget>
+                    <class>QToolButton</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>moveDownButton</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>sizePolicy</name>
+                        <sizepolicy>
+                            <hsizetype>5</hsizetype>
+                            <vsizetype>5</vsizetype>
+                        </sizepolicy>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string></string>
+                    </property>
+                    <property stdset="1">
+                        <name>pixmap</name>
+                        <pixmap>image4</pixmap>
+                    </property>
+                    <property stdset="1">
+                        <name>autoRaise</name>
+                        <bool>true</bool>
+                    </property>
+                </widget>
+                <spacer>
+                    <property>
+                        <name>name</name>
+                        <cstring>Spacer1</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>orientation</name>
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property stdset="1">
+                        <name>sizeType</name>
+                        <enum>Expanding</enum>
+                    </property>
+                    <property>
+                        <name>sizeHint</name>
+                        <size>
+                            <width>20</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+            </hbox>
+        </widget>
+        <widget row="2"  column="1" >
+            <class>QPushButton</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>okButton</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string>&amp;OK</string>
+            </property>
+        </widget>
+        <widget row="2"  column="2" >
+            <class>QPushButton</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>cancelButton</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string>&amp;Cancel</string>
+            </property>
+        </widget>
+        <widget row="1"  column="0"  rowspan="1"  colspan="3" >
+            <class>QListView</class>
+            <column>
+                <property>
+                    <name>text</name>
+                    <string>Title</string>
+                </property>
+                <property>
+                    <name>clickable</name>
+                    <bool>true</bool>
+                </property>
+                <property>
+                    <name>resizeable</name>
+                    <bool>true</bool>
+                </property>
+            </column>
+            <column>
+                <property>
+                    <name>text</name>
+                    <string>Location</string>
+                </property>
+                <property>
+                    <name>clickable</name>
+                    <bool>true</bool>
+                </property>
+                <property>
+                    <name>resizeable</name>
+                    <bool>true</bool>
+                </property>
+            </column>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>view</cstring>
+            </property>
+        </widget>
+        <spacer row="2"  column="0" >
+            <property>
+                <name>name</name>
+                <cstring>Spacer5</cstring>
+            </property>
+            <property stdset="1">
+                <name>orientation</name>
+                <enum>Horizontal</enum>
+            </property>
+            <property stdset="1">
+                <name>sizeType</name>
+                <enum>Expanding</enum>
+            </property>
+            <property>
+                <name>sizeHint</name>
+                <size>
+                    <width>20</width>
+                    <height>20</height>
+                </size>
+            </property>
+        </spacer>
+    </grid>
+</widget>
+<images>
+    <image>
+        <name>image0</name>
+        <data format="XPM.GZ" length="1160">789c5dd24953e2401407f03b9f2205376a0a079234a4a63c282a8bb2082e58d61c3a9d6e416431246cd67cf7c95b1296c021bf7effd7fd08b9285aa37ec72a5ee456918c26ca5263195ac5209ecd76ef7f2f7f72f9b2b092af6b5be5fcaf5cbe6429abbb986bb89f26f705bb6cffb6b134033ad2711c092c005de97a2e720c14520402390156ed6ab96a03bf8035bfe6d57ce037d073126235402acff3145001fdc017be035c0295eb4be21b329065ea1d305ddaf99ea93d0cbf12fd0aed7cc51412ab9f44a55500ec030337ed1d65c4de3b62dafbc29412ab1ba6a6219f884a2a17f88cd44af878d0901854e85c9f997c801aa845a0b5002e88ba42559992aa8f48ad788c1e93c75811d3de36d0247f114dd565f290ad8c38d59ec90fa7494cb6c2f08e29888d8c78d00353123f98dae0cc1da449b7ba6572ef0d937bd729e9f76e99fc70ea19311c134d8578cd1474ee3ca301464c49d53023560dd3104ba5427a95e0e23599bc95521582c2d19a869e8fb1c1c534871b4d3e4d303dcd99afc978363dcbcd17cbeff39c0957cbf35c14af3767b928deee3627b930daae77fbab935c785dbfb9dddf1de7c2b8de68b6daf7c7b9b8fed069757bfda35cbc6d34bbeddee3e0b0361c3e3d6f5e5e4783b7c3daf470256bfffee4fe03c40f2061</data>
+    </image>
+    <image>
+        <name>image1</name>
+        <data format="XPM.GZ" length="2061">789c75d4dd4fdb301000f077fe8a887b43d3914f27d6b40718fb1e8cb2c180690f8e9dd0022dd0a65098f6bfcfb93b5763ed3055f5c397f3f96cb2bd159d1eee475bdb1bb3ce74231bd9a199465b6e3e1e3ffef8f9ead7c666a222ffabe328dd7cb1b139e8221b1ddc4c9a1e587a4052f911931f7aa7716c63f62776128bf7c8dabb227fef9d25a94d79fe889dc559423eed9d9b3ccf0d39ed5da49995f901d9e495b862177141c522887541cf83eb5d664a8c27bdabac28324d3e24d7de9c2feeadf3522b8ed764ab9dcec9af7bfbf22ad9dfc7a5797f3371e847c22e13a94fb1755165545fb3744df359ef3aafd39ad6835bb2334949f3508be5793c131bae0f5a76ad0cd77bdcdb16a5937e2cd8cb7c97e250cf83d888ef97e6faf260596fceae53712756da92a7e2c69091f66b5de972eef79760c5fd31ec2ae17998b16bc3cf03b26d5a3bf29d58b1f1436f57a822e5f37dcf2e251f5eb26de30a32d5ef1a9dc8fae76c975a9a07102b8977623f68def66e9435725e13b693f3c3b15859ae6f286e1a4596e79b544cfd6a9a52cb7dfacaf6fde4fc376c2bfd84113bac07466ca43fc360de0fde2ecdf574c1b2bfcfec26e5fd21add7aad2493d3b6c5d48bfdeb1437df8466cf8fc719fbdacef82dda4bc3e8cc5d25fb8161be9ef9538f46b11dcb277c9ad7f1d717df7e2427c2dd6f2ff78152cef2faea7d589b8655b25f77d220ef7ff2e58f6fb2d58cebb1637127fc076e17e3e8ac3793cb1433ff0ad38dc9782dd2ad9ef48ec7ff8e53ce810fe330cd67fc55874cf3ffeaf0db678f157cc104734c2f725455ce1f5b33c3cc7df631f31e923f0e6591e2b9f11defa883b8a98e26c6d9e0ee77e957b8ec08735f52cf0119f7007777dc46bdc1b746bf6f506dfe23b7c8f1ff0237eeae756f27cc67d3cc02f788803dcc3a37f62b89eaff80d8ff104bfe3299eadc4f47b3ac718134cbd323ff235790a54586285da1f0280817a350f5870d0400b1730f41123b85ccd0357700d638998c00ddcfe1be3f3dfc11466d0c11ceee10116b058c973b46e50ccef971b7f008068e53b</data>
+    </image>
+    <image>
+        <name>image2</name>
+        <data format="XPM.GZ" length="439">789c95d0c10ac2300c06e07b9f222cb7219b452782f8088a47413ca4d1a1874dd07910f1dd4d56abb5272d85e6ff2009b4cc61bd5a405e9a4b47dd91810f74867c776d9adb663bbf9bcc4e406e05361b98ac0086e5a9dd6beda4c6b11dcad1c81aa7a31049235721a2c6ba0eb148ce2f8691217a227a9bd4aaf2b8a89745a9a7689ea0a77887f6277bb53331943ef6f831d7cf8c0de9b52836e7a77ed99f7fd0db63669e65445758</data>
+    </image>
+    <image>
+        <name>image3</name>
+        <data format="XPM.GZ" length="1175">789c85d34b53e2401000e03bbf2205376a6bcd6bc6a4b6f6e02b8a0ae21bb53c4c66261021a01054dcdaffbed3dd1356e2c1a91cf275cf7477a660abed0cfa5da7bdd55894a2cca5234762eeb4d5b228560f8fbfff349a1e77ccc342c76bfe68347f3ad2e9cda61ade13f3de7271010f2c43e21e32f25c1f39b68cfc18b8ac1860d97b4b49d9bb8a94d544df25f62dc300377f1063962aa0007aae1752df4ba21f8578f6901846dc07be5a4a2e80ad8adb017097c85c626ac988e59a295059c6c41322375f081c10232642609718c734f3aaa264c039517812b319323233e390336235d593a51de39a187b2936cad7c452c796b6ef3b31f5a9d18b255738c63ed05c7ac4f0aece88e69eb1f20e51303a7b818c4d65cc7688a956f853b9224a5b790a0c62c53507f680a1a7386d3e470a2528bb206a5f63f616c884d074570551dab3cfc0edb4aa2c815120ece70f2bd2d91ba2b49b8f8022d47e863c054aa5057104543af3b30cf806d4bce20498e1c2bf496d7d136b892fb1d474aec5b2e1287f1a6fc4323929a6b91a7f8acd8693e797f9222f97ebd8ab7c2bde571ff3e9ceee9e8d95fb07c9e1d1aa737c9298f5bf4779daed9df537fba693eef9c5e566ccecbbbaaeed2b6f6e3b83a4161bdfdd27b5d877f7f2f757e31f9763fc74</data>
+    </image>
+    <image>
+        <name>image4</name>
+        <data format="XPM.GZ" length="1205">789c8dd3dd6fda301000f077fe8a88bca1698d839d3a9af6d06fa005c2470bedb407c74e0ab4400ba10dadf6bf2f77e7b09649d32c84f2bb3bec3ba31cd49c71d4766a079575a6b2a976f444ad9c9ad9cce7db1f3fbfbf57aa2c708a8f28beab5f2ad5af8e763acb4502cf17c5b3ebe102f62db927819ea564981d5b6a86d9159171e21d5216592c6644e651766ac97dccbe5a4ae239d1971c3b3c210a7158075e1343a305d0009957e7c207e69692d8d85101cf88dc239e5af2008b5d4b4d078d88819031b06719861cd826862c36c0374b413cb60c895949eaf986a818f1d652682c5e5a26448d94dca326155178d464442cb73a22c6ca203b44ed1bfc7fd740dfe392b67a21163de3443132e43ac0cb99138b0131fb6c698b07c03a3b34a10636899229cc3e013933f6dc0d529924417689894fbc020a5536f9000cfc9213a42a2e07277a04163ddaad12a0e25a2501f012a9cb83b6402d4ade038d4882148b5bc0027e9a0267960171814cca6c0a4c77d9211217be447beb9f3157b9b1367bb124bd9f4cf762b387c7f97e6cb17c7a5e7d8ead67d9e6e5f54f2c77dd75bc7d3b3a3e393d3bbfb0758d66ebf2aa9d75ba51afbffb6d3e185e6737dd6834feb05fa339bc2daaee3e9d910f5ad1c8db9badd1ebb1bfe6cdfbff73071f63bfbe557e03042d021b</data>
+    </image>
+</images>
+<connections>
+    <connection>
+        <sender>okButton</sender>
+        <signal>clicked()</signal>
+        <receiver>BookmarkEditorBase</receiver>
+        <slot>accept()</slot>
+    </connection>
+    <connection>
+        <sender>cancelButton</sender>
+        <signal>clicked()</signal>
+        <receiver>BookmarkEditorBase</receiver>
+        <slot>reject()</slot>
+    </connection>
+    <connection>
+        <sender>view</sender>
+        <signal>selectionChanged()</signal>
+        <receiver>BookmarkEditorBase</receiver>
+        <slot>updateButtons()</slot>
+    </connection>
+    <connection>
+        <sender>newBookmarkButton</sender>
+        <signal>clicked()</signal>
+        <receiver>BookmarkEditorBase</receiver>
+        <slot>newBookmark()</slot>
+    </connection>
+    <connection>
+        <sender>editBookmarkButton</sender>
+        <signal>clicked()</signal>
+        <receiver>BookmarkEditorBase</receiver>
+        <slot>editBookmark()</slot>
+    </connection>
+    <connection>
+        <sender>deleteBookmarkButton</sender>
+        <signal>clicked()</signal>
+        <receiver>BookmarkEditorBase</receiver>
+        <slot>deleteBookmark()</slot>
+    </connection>
+    <connection>
+        <sender>moveUpButton</sender>
+        <signal>clicked()</signal>
+        <receiver>BookmarkEditorBase</receiver>
+        <slot>moveBookmarkUp()</slot>
+    </connection>
+    <connection>
+        <sender>moveDownButton</sender>
+        <signal>clicked()</signal>
+        <receiver>BookmarkEditorBase</receiver>
+        <slot>moveBookmarkDown()</slot>
+    </connection>
+    <slot access="protected">deleteBookmark()</slot>
+    <slot access="protected">editBookmark()</slot>
+    <slot access="protected">moveBookmarkDown()</slot>
+    <slot access="protected">moveBookmarkUp()</slot>
+    <slot access="protected">newBookmark()</slot>
+    <slot access="protected">updateButtons()</slot>
+</connections>
+</UI>

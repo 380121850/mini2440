@@ -1,0 +1,68 @@
+--- ../../kdelibs/khtml/rendering/render_style.h	Mon Jun  4 23:26:52 2001
++++ ./kdesrc/khtml/rendering/render_style.h	Mon Oct  8 17:50:31 2001
+@@ -193,7 +193,7 @@ public:
+     }
+     QColor color;
+     unsigned short width : 12;
+-    EBorderStyle style : 4;
++    EBorderStyle style;
+ 
+     bool nonZero() const { return width!=0 && style!=BNONE; }
+ 
+@@ -520,36 +520,36 @@ protected:
+ 
+ // inherit
+     bool _border_collapse : 1 ;
+-    EEmptyCell _empty_cells : 2 ;
+-    ECaptionSide _caption_side : 2;
+-    EListStyleType _list_style_type : 5 ;
+-    EListStylePosition _list_style_position :1;
+-    EVisiblity _visiblity : 2;
+-    ETextAlign _text_align : 3;
+-    ETextTransform _text_transform : 4;
+-    EDirection _direction : 1;
+-    EWhiteSpace _white_space : 2;
++    EEmptyCell _empty_cells ;
++    ECaptionSide _caption_side;
++    EListStyleType _list_style_type ;
++    EListStylePosition _list_style_position ;
++    EVisiblity _visiblity ;
++    ETextAlign _text_align ;
++    ETextTransform _text_transform ;
++    EDirection _direction ;
++    EWhiteSpace _white_space ;
+     int _text_decoration : 4;
+     bool _visuallyOrdered : 1;
+-    ECursor _cursor_style : 4;
+-    EFontVariant _font_variant : 1;
++    ECursor _cursor_style ;
++    EFontVariant _font_variant ;
+     
+     bool _htmlHacks :1;
+ 
+ // don't inherit
+ 
+-    EOverflow _overflow : 4 ;
+-    EVerticalAlign _vertical_align : 4;
+-    EClear _clear : 2;
+-    ETableLayout _table_layout : 1;
+-    EBackgroundRepeat _bg_repeat : 2;
+-    bool _bg_attachment : 1;
+-    EPosition _position : 2;
+-    EFloat _floating : 2;
++    EOverflow _overflow  ;
++    EVerticalAlign _vertical_align ;
++    EClear _clear ;
++    ETableLayout _table_layout ;
++    EBackgroundRepeat _bg_repeat ;
++    bool _bg_attachment ;
++    EPosition _position ;
++    EFloat _floating ;
+ 
+     bool _flowAroundFloats :1;
+ 
+-    PseudoId _styleType : 2;
++    PseudoId _styleType ;
+     bool _hasHover : 1;
+     bool _hasFocus : 1;
+     bool _hasActive : 1;

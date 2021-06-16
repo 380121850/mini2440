@@ -1,0 +1,127 @@
+AM_CONDITIONAL(KONQ_EMBEDDED, true)
+AC_DEFINE_UNQUOTED(KONQ_EMBEDDED, 1, [Defined because we are building the embedded version])
+
+require_dlopen=""
+export_symbols=""
+
+AC_ARG_ENABLE(selection,[  --disable-selection     Disable text selection],
+        want_selection=$enableval, want_selection=yes)
+ 
+if test "x$want_selection" = "xno"; then
+  AC_DEFINE_UNQUOTED(KHTML_NO_SELECTION, 1, [Defined if selections in KHTML are disabled])
+fi
+
+AC_ARG_ENABLE(scrollbars,[  --disable-scrollbars    Disable scrollbars in KHTML],
+        want_scrollbars=$enableval, want_scrollbars=yes)
+ 
+if test "x$want_scrollbars" = "xno"; then
+  AC_DEFINE_UNQUOTED(KHTML_NO_SCROLLBARS, 1, [Defined if scrollbars in KHTML are disabled])
+fi
+
+AC_ARG_ENABLE(javascript,[  --disable-javascript    Disable JavaScript support],
+              want_javascript=$enableval,want_javascript=yes)
+
+if test "x$want_javascript" = "xyes"; then
+    javascript_mode=static
+else
+    javascript_mode=none
+    KJS_SUBDIR=""
+    ECMA_SUBDIR=""
+    LIB_KJSHTML=""
+fi
+
+AC_ARG_WITH(javascript,[  --with-javascript=mode  where mode is one of static/dynamic/none],
+            javascript_mode=$withval,
+	    javascript_mode=static)
+ 
+AM_CONDITIONAL(DLOPEN_JAVASCRIPT, test "x$javascript_mode" = "xdynamic")
+
+KJS_SUBDIR="kjs"
+ECMA_SUBDIR="ecma"
+LIB_KHTML="\$(top_builddir)/konq-embed/kdesrc/khtml/libkhtml_i.la"
+ 
+if test "x$javascript_mode" = "xnone"; then
+    KJS_SUBDIR=""
+    ECMA_SUBDIR=""
+    LIB_KJSHTML=""
+else
+   AC_DEFINE_UNQUOTED(ENABLE_JAVASCRIPT, 1, [Defined if JavaScript support is enabled])
+
+   if test "x$javascript_mode" = "xstatic"; then
+       LIB_KJSHTML="\$(top_builddir)/konq-embed/kdesrc/khtml/ecma/libkjs_html_i.la"
+       LIB_KJSHTML="$LIB_KJSHTML \$(top_builddir)/konq-embed/kdesrc/kjs/libkjs.la"
+       LIB_KJSHTML="$LIB_KJSHTML \$(LIBPCRE)"
+   else
+       require_dlopen="yes"
+       export_symbols="yes"
+       LIB_KJSHTML=""
+       LIB_KHTML="\$(top_builddir)/konq-embed/kdesrc/khtml/libkhtml.la"
+       AC_DEFINE_UNQUOTED(DLOPEN_JAVASCRIPT, 1, [Defined if JavaScript should be dynamically opened at run-time])
+   fi
+fi
+
+AC_SUBST(KJS_SUBDIR)
+AC_SUBST(ECMA_SUBDIR)
+AC_SUBST(LIB_KJSHTML)
+AC_SUBST(LIB_KHTML)
+ 
+AC_ARG_ENABLE(kjsmemdebug,[  --enable-kjsmemdebug    Enable KJS memory debugging],
+        want_kjsmemdebug=$enableval, want_kjsmemdebug=no)
+ 
+if test "x$want_kjsmemdebug" = "xyes"; then
+  AC_DEFINE_UNQUOTED(KJS_DEBUG_MEM, 1, [Defined if we debug the KJS memory (de)allocations])
+  kjs_debug_mem="-DKJS_DEBUG_MEM"
+else
+  kjs_debug_mem=""
+fi
+AC_SUBST(kjs_debug_mem)
+
+dnl ### hack for kssl Makefile.am
+LIB_KDEUI=""
+AC_SUBST(LIB_KDEUI)
+kde_icondir='${prefix}/pics'
+AC_SUBST(kde_icondir)
+kde_appsdir='${prefix}/apps'
+AC_SUBST(kde_appsdir)
+
+AC_ARG_ENABLE(dynamic-ssl,[  --enable-dynamic-ssl    dlopen the SSL libraries at run-time (default: yes)],
+        want_dynamicssl=$enableval, want_dynamicssl=yes)
+ 
+if test "x$want_dynamicssl" = "xyes"; then
+    require_dlopen="yes"
+    AC_DEFINE_UNQUOTED(KONQ_DYNAMIC_SSL, 1, [dlopen the SSL libraries at run-time])
+    KONQ_LIBSSL=""
+    KONQ_SSL_LDFLAGS=""
+    KONQ_LIBDL="\$(LIBDL)"
+else
+    KONQ_LIBSSL="\$(LIBSSL)"
+    KONQ_SSL_LDFLAGS="\$(SSL_LDFLAGS)"
+    KONQ_LIBDL=""
+fi
+
+AC_SUBST(KONQ_LIBSSL)
+AC_SUBST(KONQ_SSL_LDFLAGS)
+AC_SUBST(KONQ_LIBDL)
+
+AC_ARG_ENABLE(dlopen-addons,[  --enable-dlopen-addons  allow loading dynamic add-ons (default: no)],
+        want_dlopen_addons=$enableval, want_dlopen_addons=no)
+ 
+if test "x$want_dlopen_addons" = "xyes"; then
+    require_dlopen="yes"
+    export_symbols="yes"
+    AC_DEFINE_UNQUOTED(DYNAMIC_ADD_ONS, 1, [Defined if dynamic add-ons are enabled])
+fi
+AM_CONDITIONAL(DYNAMIC_ADD_ONS, test "x$want_dlopen_addons" = "xyes")
+AM_CONDITIONAL(STATIC_ADD_ONS, test "x$want_dlopen_addons" != "xyes")
+
+if test "x$export_symbols" = "xyes"; then
+    AC_DEFINE_UNQUOTED(EXPORT_SYMBOLS, 1, [Defined if the executable exports its symbols])
+fi
+AM_CONDITIONAL(EXPORT_SYMBOLS, test "x$export_symbols" = "xyes")
+
+KDE_CHECK_DLOPEN(ac_konq_have_dlopen=no, ac_konq_have_dlopen=yes)
+
+if test "x$ac_konq_have_dlopen" = "xno" && test "x$require_dlopen" = "xyes"; then
+    AC_MSG_ERROR([dlopen requested but no dlopen support found on this system.])
+fi
+

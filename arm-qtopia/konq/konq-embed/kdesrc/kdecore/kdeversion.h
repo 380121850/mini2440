@@ -1,0 +1,1 @@
+#define KDE_VERSION_STRING "2.2.2"

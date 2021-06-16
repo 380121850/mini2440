@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Embedded Flash Player
+Name[de]=KFlashPlay-Objekt
+Type=Service
+MimeType=application/x-shockwave-flash;application/x-futuresplash
+ServiceTypes=KParts/ReadOnlyPart
+X-KDE-Library=libkflash
+X-KDE-AutoEmbed=true

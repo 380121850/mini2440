@@ -1,0 +1,295 @@
+#!/bin/sh
+# vim: et sw=4
+# Simon Hausmann <simon@kde.org> 
+# $Id: konqe-build,v 1.4.2.4 2002/02/12 14:49:21 hausmann Exp $
+
+oldpwd=`pwd`
+cleanUpAtExit=1
+wget="wget --cache=off"
+snapshotName=
+snapshotTarBall=
+cvs=
+log=
+execlog=
+self=`basename $0`
+konqeBranch=
+kdelibsBranch=
+kdelibsSubDirs="kdecore kio kjs kparts khtml kssl"
+
+msg()
+{
+    output="$self[`date +%H:%M:%S`]: $1"
+    if [ -z "$log" ]; then
+        echo $output
+    else
+        echo $output >> $log
+    fi
+}
+
+_exec()
+{
+    if [ -z "$execlog" ]; then
+        cmd="$1 1>/dev/null 2>/dev/null"
+    else
+        cmd="$1 >>$execlog 2>&1"
+    fi
+    eval $cmd
+}
+
+checkEnv()
+{
+    if [ -n "$MAKE" ]; then
+        make=$MAKE
+    else
+        make="make"
+    fi
+    if [ -n "$TAR" ]; then
+        tar=$TAR
+    else
+        tar="tar"
+    fi
+}
+
+cleanUp()
+{
+    if [ -d $builddir ]; then
+        msg "cleaning up in $builddir..."
+        cd $oldpwd && rm -rf $builddir
+    fi
+}
+
+abort()
+{
+    msg "$1"
+    if [ $cleanUpAtExit = 1 ]; then
+        cleanUp
+    fi
+    exit 1
+}
+
+setupCVS()
+{
+    cvs="cvs"
+
+    if [ -z "$CVSROOT" ]; then
+        CVSROOT=":pserver:anonymous@cvs.kde.org:/home/kde"
+        cvs="cvs -d $CVSROOT"
+    fi
+
+    grep "$CVSROOT" $HOME/.cvspass >/dev/null || \
+        abort "no cvs login for $CVSROOT, exiting..."
+}
+
+cvsCheckOut()
+{
+
+    if [ $# = 1 ]; then
+
+        msg "checking out $1 ..."
+        _exec "$cvs co $1" || \
+            abort "error during cvs checkout '$1', exiting..."
+
+    else
+
+        msg "checking out $1 ($2 branch) ..."
+        _exec "$cvs co -r$2 $1" || \
+            abort "error during cvs checkout '$1', exiting..."
+
+    fi
+}
+
+_cd()
+{
+    msg "entering directory $1"
+    cd $1 || \
+        abort "cannot cd' into $1, exiting..."
+}
+
+_mkdir()
+{
+    msg "creating directory $1"
+    mkdir -m 0700 $1 2>/dev/null || \
+        abort "error creating $1, exiting..."
+}
+
+_md()
+{
+   _mkdir $1
+   _cd $1
+}
+
+_mv()
+{
+    mv $1 $2 || \
+        abort "error moving $1 to $2, exiting..."
+}
+
+_rm()
+{
+    rm -rf $@ || \
+        abort "error removing $@, exiting..."
+}
+
+setupBuildDir()
+{
+    builddir="/tmp/$self-$USER"
+    oldCleanUpAtExit=$cleanUpAtExit
+    cleanUpAtExit=0
+    _mkdir $builddir
+    cleanUpAtExit=$oldCleanUpAtExit
+}
+
+
+checkOutSources()
+{
+    _md $builddir/src
+
+    cvsCheckOut kdenox $konqeBranch
+
+    kdelibsDate=`cat ./kdenox/konq-embed/VERSION | sed -e "s,.*-\(.*\),\1,"` || \
+        abort "cannot determine konq/e version, exiting..."
+
+    for subdir in $kdelibsSubDirs; do
+        if [ -z "$kdelibsBranch" ]; then
+            cvsCheckOut "-D $kdelibsDate kdelibs/$subdir"
+        else
+            cvsCheckOut kdelibs/$subdir $kdelibsBranch
+        fi
+    done
+}
+
+makeDistTarBall()
+{
+    msg "[task] building snapshot tarball"
+
+    _cd $builddir/src/kdenox
+    
+    msg "making dist..."
+    _exec "$make -f Makefile.cvs dist" || \
+        abort "error making dist target, exiting..."
+
+    # grr, want to use zsh's **/CVS(/) :)
+    find . -type d -name "CVS" | xargs rm -rf
+    find . -type f -name ".cvsignore" | xargs rm -rf
+
+    _cd $builddir/src
+
+    version=`cat ./kdenox/konq-embed/VERSION | sed -e 's,_,-,g'` || \
+        abort "cannot determine konq/e version (2) , exiting..."
+
+    snapshotName=konqueror-embedded-$version
+
+    _mv kdenox $snapshotName
+
+    msg "tarring up..."
+
+    snapshotTarBall=$snapshotName.tar.gz
+
+    _exec "$tar czvf ../$snapshotTarBall $snapshotName" || \
+        abort "error creating snapshot tarball, exiting..."
+
+    msg "cleaning up"
+    _cd $builddir/src
+    _rm -rf $snapshotName kdelibs
+
+    msg "--> snapshot tarball done. $builddir/$snapshotTarBall"
+}
+
+makeIpkg()
+{
+    msg "[task] building arm ipkg"
+
+    if [ -z "$snapshotTarBall" -o -z "$snapshotName" ]; then
+        abort "internal error, \$snapshotTarBall not set in crossCompile(), exiting..."
+    fi
+
+    _cd $builddir/src
+
+    _exec "$tar xzvf ../$snapshotTarBall" || \
+        abort "error untarring $snapshotTarBall, exiting..."
+
+    _cd $snapshotName
+
+    owd=`pwd`
+
+    if [ -r $HOME/.konqe-buildrc ]; then
+        msg "loading $HOME/.konqe-buildrc..."
+        . $HOME/.konqe-buildrc
+    else
+        msg "warning: missing $HOME/.konqe-buildrc!"
+    fi
+
+    if [ $owd != `pwd` ]; then
+        cd $owd
+    fi
+
+    msg "running configure..."
+
+    _exec "./configure $KONQE_CONFIG_FLAGS" || \
+        abort "error configuring ipkg, exiting..."
+
+    msg "running make..."
+
+    _exec "$make" || \
+        abort "error during compilation, exiting..."
+
+    msg "running make ipkg..."
+
+    _exec "$make ipkg" || \
+        abort "error during '$make ipkg', exiting..."
+
+    msg "done. copying package and cleaning up..."
+
+    ipkgs=`ls konq-embed/ipkg/*.ipk`
+    if [ -z "$ipkgs" ]; then
+        abort "cannot find ipkgs in $builddir/src/$snapshotName/konq-embed/ipkg/, exiting..."
+    fi
+
+    for ipkg in $ipkgs; do
+        _mv $ipkg $builddir
+    done
+
+    _cd $builddir/src
+    _rm -rf $snapshotName
+
+    msg "--> ipkgs done."
+}
+
+_skipipkg=0
+_execlog=0
+for option
+do
+    case "$option" in
+        -*=*) arg=`echo "$option" | sed 's,[-_a-zA-Z0-9]*=,,'`
+    esac
+
+    case "$option" in
+        --no-ipkg) _skipipkg=1 ;;
+        --no-cleanup) cleanUpAtExit=0 ;;
+        --log=*) log="`pwd`/$arg" ;;
+        --exec-log) _execlog=1 ;;
+        --konqe-branch=*) konqeBranch=$arg ;;
+        --kdelibs-branch=*) kdelibsBranch=$arg ;;
+    esac
+done
+
+if [ $_execlog = 1 ]; then
+    execlog=$log
+fi
+
+checkEnv
+
+setupBuildDir
+
+setupCVS
+
+checkOutSources
+
+makeDistTarBall
+
+if [ $_skipipkg = 0 ]; then
+    makeIpkg
+fi
+
+_rm $builddir/src
+
