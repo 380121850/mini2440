@@ -60,39 +60,42 @@
 
 <p>Currently available applets include:</p>
 
-<pre><code>        [, [[, acpid, add-shell, addgroup, adduser, adjtimex, arch, arp,
-        arping, ash, awk, base64, basename, bc, beep, blkdiscard, blkid,
-        blockdev, bootchartd, brctl, bunzip2, bzcat, bzip2, cal, cat, chat,
-        chattr, chgrp, chmod, chown, chpasswd, chpst, chroot, chrt, chvt,
-        cksum, clear, cmp, comm, conspy, cp, cpio, crond, crontab, cryptpw,
-        cttyhack, cut, date, dc, dd, deallocvt, delgroup, deluser, depmod,
-        devmem, df, dhcprelay, diff, dirname, dmesg, dnsd, dnsdomainname,
-        dos2unix, dpkg, dpkg-deb, du, dumpkmap, dumpleases, echo, ed, egrep,
-        eject, env, envdir, envuidgid, ether-wake, expand, expr, factor,
-        fakeidentd, fallocate, false, fatattr, fbset, fbsplash, fdflush,
-        fdformat, fdisk, fgconsole, fgrep, find, findfs, flock, fold, free,
-        freeramdisk, fsck, fsck.minix, fsfreeze, fstrim, fsync, ftpd,
-        ftpget, ftpput, fuser, getopt, getty, grep, groups, gunzip, gzip,
-        halt, hd, hdparm, head, hexdump, hexedit, hostid, hostname, httpd,
-        hush, hwclock, i2cdetect, i2cdump, i2cget, i2cset, i2ctransfer, id,
-        ifconfig, ifdown, ifenslave, ifplugd, ifup, inetd, init, insmod,
-        install, ionice, iostat, ip, ipaddr, ipcalc, ipcrm, ipcs, iplink,
-        ipneigh, iproute, iprule, iptunnel, kbd_mode, kill, killall,
-        killall5, klogd, last, less, link, linux32, linux64, linuxrc, ln,
-        loadfont, loadkmap, logger, login, logname, logread, losetup, ls,
-        lsattr, lsmod, lsof, lspci, lsscsi, lsusb, lzcat, lzma, lzop,
-        makedevs, man, md5sum, mdev, mesg, microcom, mim, mkdir, mkdosfs,
-        mke2fs, mkfifo, mkfs.ext2, mkfs.minix, mkfs.vfat, mknod, mkpasswd,
-        mkswap, mktemp, modinfo, modprobe, more, mount, mountpoint, mpstat,
-        mt, mv, nameif, nanddump, nandwrite, nbd-client, nc, netstat, nice,
-        nl, nmeter, nohup, nologin, nproc, nslookup, ntpd, nuke, od, openvt,
-        partprobe, passwd, paste, patch, pgrep, pidof, ping, ping6,
-        pipe_progress, pivot_root, pkill, pmap, poweroff, powertop,
-        printenv, printf, ps, pscan, pstree, pwd, pwdx, raidautorun, rdate,
-        rdev, readahead, readlink, readprofile, realpath, reboot,
-        remove-shell, renice, reset, resize, resume, rev, rm, rmdir, rmmod,
-        route, rpm, rpm2cpio, rtcwake, run-init, run-parts, runlevel, runsv,
-        runsvdir, rx, script, scriptreplay, sed, seq, setarch, setconsole,
+<pre><code>        [, [[, acpid, add-shell, addgroup, adduser, adjtimex, ar, arch, arp,
+        arping, ash, awk, base64, basename, bbconfig, bc, beep, blkdiscard,
+        blkid, blockdev, bootchartd, brctl, bunzip2, busybox, bzcat, bzip2,
+        cal, cat, chat, chattr, chgrp, chmod, chown, chpasswd, chpst,
+        chroot, chrt, chvt, cksum, clear, cmp, comm, conspy, cp, cpio,
+        crond, crontab, cryptpw, cttyhack, cut, date, dc, dd, deallocvt,
+        delgroup, deluser, depmod, devfsd, devmem, df, dhcprelay, diff,
+        dirname, dmesg, dnsd, dnsdomainname, dos2unix, dpkg, dpkg-deb, du,
+        dumpkmap, dumpleases, echo, ed, egrep, eject, env, envdir,
+        envuidgid, ether-wake, expand, expr, factor, fakeidentd, fallocate,
+        false, fatattr, fbset, fbsplash, fdflush, fdformat, fdisk,
+        fgconsole, fgrep, find, findfs, flash_eraseall, flash_lock,
+        flash_unlock, flashcp, flock, fold, free, freeramdisk, fsck,
+        fsck.minix, fsfreeze, fstrim, fsync, ftpd, ftpget, ftpput, fuser,
+        getopt, getty, grep, groups, gunzip, gzip, halt, hd, hdparm, head,
+        hexdump, hexedit, hostid, hostname, httpd, hush, hwclock, i2cdetect,
+        i2cdump, i2cget, i2cset, i2ctransfer, id, ifconfig, ifdown,
+        ifenslave, ifplugd, ifup, inetd, init, inotifyd, insmod, install,
+        ionice, iostat, ip, ipaddr, ipcalc, ipcrm, ipcs, iplink, ipneigh,
+        iproute, iprule, iptunnel, kbd_mode, kill, killall, killall5, klogd,
+        last, less, link, linux32, linux64, linuxrc, ln, loadfont, loadkmap,
+        logger, login, logname, logread, losetup, lpd, lpq, lpr, ls, lsattr,
+        lsmod, lsof, lspci, lsscsi, lsusb, lzcat, lzma, lzop, lzopcat,
+        makedevs, makemime, man, md5sum, mdev, mesg, microcom, mim, minips,
+        mkdir, mkdosfs, mke2fs, mkfifo, mkfs.ext2, mkfs.minix, mkfs.reiser,
+        mkfs.vfat, mknod, mkpasswd, mkswap, mktemp, modinfo, modprobe, more,
+        mount, mountpoint, mpstat, mt, mv, nameif, nanddump, nandwrite,
+        nbd-client, nc, netcat, netstat, nice, nl, nmeter, nohup, nologin,
+        nproc, nslookup, ntpd, nuke, od, openvt, partprobe, passwd, paste,
+        patch, pgrep, pidof, ping, ping6, pipe_progress, pivot_root, pkill,
+        pmap, popmaildir, poweroff, powertop, printenv, printf, ps, pscan,
+        pstree, pwd, pwdx, raidautorun, rdate, rdev, readahead, readlink,
+        readprofile, realpath, reboot, reformime, remove-shell, renice,
+        reset, resize, resume, rev, rfkill, rm, rmdir, rmmod, route, rpm,
+        rpm2cpio, rtcwake, run-init, run-parts, runlevel, runsv, runsvdir,
+        rx, script, scriptreplay, sed, sendmail, seq, setarch, setconsole,
         setfattr, setfont, setkeycodes, setlogcons, setpriv, setserial,
         setsid, setuidgid, sh, sha1sum, sha256sum, sha3sum, sha512sum,
         showkey, shred, shuf, slattach, sleep, smemcap, softlimit, sort,
@@ -101,12 +104,13 @@
         sync, sysctl, syslogd, tac, tail, tar, taskset, tc, tcpsvd, tee,
         telnet, telnetd, test, tftp, tftpd, time, timeout, top, touch, tr,
         traceroute, traceroute6, true, truncate, ts, tty, ttysize, tunctl,
-        ubiattach, ubidetach, ubimkvol, ubirename, ubirmvol, ubirsvol,
-        ubiupdatevol, udhcpc, udhcpc6, udhcpd, udpsvd, uevent, umount,
-        uname, unexpand, uniq, unix2dos, unlink, unlzma, unshare, unxz,
-        unzip, uptime, users, usleep, uudecode, uuencode, vconfig, vi,
-        vlock, volname, w, wall, watch, watchdog, wc, wget, which, who,
-        whoami, whois, xargs, xxd, xz, xzcat, yes, zcat, zcip</code></pre>
+        tune2fs, ubiattach, ubidetach, ubimkvol, ubirename, ubirmvol,
+        ubirsvol, ubiupdatevol, udhcpc, udhcpc6, udhcpd, udpsvd, uevent,
+        umount, uname, uncompress, unexpand, uniq, unix2dos, unlink, unlzma,
+        unlzop, unshare, unxz, unzip, uptime, users, usleep, uudecode,
+        uuencode, vconfig, vi, vlock, volname, w, wall, watch, watchdog, wc,
+        wget, which, who, whoami, whois, xargs, xxd, xz, xzcat, yes, zcat,
+        zcip</code></pre>
 
 <h1 id="COMMAND-DESCRIPTIONS">COMMAND DESCRIPTIONS</h1>
 
@@ -181,6 +185,20 @@
         -t TICK Microseconds per tick, usually 10000
                 (positive -t or -f values make clock run faster)
         -p TCONST</code></pre>
+
+</dd>
+<dt id="ar"><b>ar</b></dt>
+<dd>
+
+<p>ar [-o] [-v] [-p] [-t] [-x] ARCHIVE FILES</p>
+
+<p>Extract or list FILES from an ar archive</p>
+
+<pre><code>        -o      Preserve original dates
+        -p      Extract to stdout
+        -t      List
+        -x      Extract
+        -v      Verbose</code></pre>
 
 </dd>
 <dt id="arch"><b>arch</b></dt>
@@ -262,6 +280,14 @@
 <p>basename FILE [SUFFIX]</p>
 
 <p>Strip directory path and .SUFFIX from FILE</p>
+
+</dd>
+<dt id="bbconfig"><b>bbconfig</b></dt>
+<dd>
+
+<p>bbconfig</p>
+
+<p>Print the config file used by busybox build</p>
 
 </dd>
 <dt id="bc"><b>bc</b></dt>
@@ -846,6 +872,22 @@ Options:
 <pre><code>        -n      Dry run: print file to stdout</code></pre>
 
 </dd>
+<dt id="devfsd"><b>devfsd</b></dt>
+<dd>
+
+<p>devfsd mntpnt [-v][-fg][-np]</p>
+
+<p>Manage devfs permissions and old device name symlinks</p>
+
+<pre><code>        mntpnt  The mount point where devfs is mounted
+        -v      Print the protocol version numbers for devfsd
+                and the kernel-side protocol version and exit
+        -fg     Run in foreground
+        -np     Exit after parsing the configuration file
+                and processing synthetic REGISTER events,
+                don&#39;t poll for events</code></pre>
+
+</dd>
 <dt id="devmem"><b>devmem</b></dt>
 <dd>
 
@@ -1323,6 +1365,44 @@ If none of the following actions is specified, -print is assumed
 <p>Find a filesystem device based on a label or UUID</p>
 
 </dd>
+<dt id="flash_eraseall"><b>flash_eraseall</b></dt>
+<dd>
+
+<p>flash_eraseall [-jNq] MTD_DEVICE</p>
+
+<p>Erase an MTD device</p>
+
+<pre><code>        -j      Format the device for jffs2
+        -N      Don&#39;t skip bad blocks
+        -q      Don&#39;t display progress messages</code></pre>
+
+</dd>
+<dt id="flash_lock"><b>flash_lock</b></dt>
+<dd>
+
+<p>flash_lock MTD_DEVICE OFFSET SECTORS</p>
+
+<p>Lock part or all of an MTD device. If SECTORS is -1, then all sectors will be locked, regardless of the value of OFFSET</p>
+
+</dd>
+<dt id="flash_unlock"><b>flash_unlock</b></dt>
+<dd>
+
+<p>flash_unlock MTD_DEVICE</p>
+
+<p>Unlock an MTD device</p>
+
+</dd>
+<dt id="flashcp"><b>flashcp</b></dt>
+<dd>
+
+<p>flashcp -v FILE MTD_DEVICE</p>
+
+<p>Copy an image to MTD device</p>
+
+<pre><code>        -v      Verbose</code></pre>
+
+</dd>
 <dt id="flock"><b>flock</b></dt>
 <dd>
 
@@ -1528,7 +1608,7 @@ If none of the following actions is specified, -print is assumed
 <dt id="grep"><b>grep</b></dt>
 <dd>
 
-<p>grep [-HhnlLoqvsrRiwFE] [-m N] [-A/B/C N] PATTERN/-e PATTERN.../-f FILE [FILE]...</p>
+<p>grep [-HhnlLoqvsrRiwFEz] [-m N] [-A/B/C N] PATTERN/-e PATTERN.../-f FILE [FILE]...</p>
 
 <p>Search for PATTERN in FILEs (or stdin)</p>
 
@@ -1549,6 +1629,7 @@ If none of the following actions is specified, -print is assumed
         -x      Match whole lines only
         -F      PATTERN is a literal (not regexp)
         -E      PATTERN is an extended regexp
+        -z      Input is NUL terminated
         -m N    Match up to N times per file
         -A N    Print N lines of trailing context
         -B N    Print N lines of leading context
@@ -1581,11 +1662,12 @@ If none of the following actions is specified, -print is assumed
 <dt id="gzip"><b>gzip</b></dt>
 <dd>
 
-<p>gzip [-cfkdt] [FILE]...</p>
+<p>gzip [-cfkdt123456789] [FILE]...</p>
 
 <p>Compress FILEs (or stdin)</p>
 
-<pre><code>        -d      Decompress
+<pre><code>        -1..9   Compression level
+        -d      Decompress
         -t      Test file integrity
         -c      Write to stdout
         -f      Force
@@ -1992,6 +2074,34 @@ MODE is:
 <p>HUP: reload /etc/inittab TSTP: stop respawning until CONT QUIT: re-exec another init USR1/TERM/USR2/INT: run halt/reboot/poweroff/Ctrl-Alt-Del script</p>
 
 </dd>
+<dt id="inotifyd"><b>inotifyd</b></dt>
+<dd>
+
+<p>inotifyd PROG FILE1[:MASK]...</p>
+
+<p>Run PROG on filesystem changes. When a filesystem event matching MASK occurs on FILEn, PROG ACTUAL_EVENTS FILEn [SUBFILE] is run. If PROG is -, events are sent to stdout. Events:</p>
+
+<pre><code>        a       File is accessed
+        c       File is modified
+        e       Metadata changed
+        w       Writable file is closed
+        0       Unwritable file is closed
+        r       File is opened
+        D       File is deleted
+        M       File is moved
+        u       Backing fs is unmounted
+        o       Event queue overflowed
+        x       File can&#39;t be watched anymore
+If watching a directory:
+
+        y       Subfile is moved into dir
+        m       Subfile is moved out of dir
+        n       Subfile is created
+        d       Subfile is deleted</code></pre>
+
+<p>inotifyd waits for PROG to exit. When x event happens for all FILEs, inotifyd exits.</p>
+
+</dd>
 <dt id="insmod"><b>insmod</b></dt>
 <dd>
 
@@ -2331,6 +2441,38 @@ Output format:
         -f      Show/use next free loop device</code></pre>
 
 </dd>
+<dt id="lpd"><b>lpd</b></dt>
+<dd>
+
+<p>lpd SPOOLDIR [HELPER [ARGS]]</p>
+
+<p>SPOOLDIR must contain (symlinks to) device nodes or directories with names matching print queue names. In the first case, jobs are sent directly to the device. Otherwise each job is stored in queue directory and HELPER program is called. Name of file to print is passed in $DATAFILE variable. Example:</p>
+
+<pre><code>        tcpsvd -E 0 515 softlimit -m 999999 lpd /var/spool ./print</code></pre>
+
+</dd>
+<dt id="lpq"><b>lpq</b></dt>
+<dd>
+
+<p>lpq [-P queue[@host[:port]]] [-U USERNAME] [-d JOBID]... [-fs]</p>
+
+<pre><code>        -P      lp service to connect to (else uses $PRINTER)
+        -d      Delete jobs
+        -f      Force any waiting job to be printed
+        -s      Short display</code></pre>
+
+</dd>
+<dt id="lpr"><b>lpr</b></dt>
+<dd>
+
+<p>lpr -P queue[@host[:port]] -U USERNAME -J TITLE -Vmh [FILE]...</p>
+
+<pre><code>        -P      lp service to connect to (else uses $PRINTER)
+        -m      Send mail on completion
+        -h      Print banner page too
+        -V      Verbose</code></pre>
+
+</dd>
 <dt id="ls"><b>ls</b></dt>
 <dd>
 
@@ -2445,6 +2587,15 @@ Output format:
         -C      Also write checksum of compressed block</code></pre>
 
 </dd>
+<dt id="lzopcat"><b>lzopcat</b></dt>
+<dd>
+
+<p>lzopcat [-vF] [FILE]...</p>
+
+<pre><code>        -v      Verbose
+        -F      Don&#39;t verify checksum</code></pre>
+
+</dd>
 <dt id="makedevs"><b>makedevs</b></dt>
 <dd>
 
@@ -2453,6 +2604,22 @@ Output format:
 <p>Create a range of special files as specified in a device table. Device table entries take the form of:</p>
 
 <p>&lt;name&gt; &lt;type&gt; &lt;mode&gt; &lt;uid&gt; &lt;gid&gt; &lt;major&gt; &lt;minor&gt; &lt;start&gt; &lt;inc&gt; &lt;count&gt; Where name is the file name, type can be one of: f Regular file d Directory c Character device b Block device p Fifo (named pipe) uid is the user id for the target file, gid is the group id for the target file. The rest of the entries (major, minor, etc) apply to to device special files. A &#39;-&#39; may be used for blank entries.</p>
+
+</dd>
+<dt id="makemime"><b>makemime</b></dt>
+<dd>
+
+<p>makemime [OPTIONS] [FILE]...</p>
+
+<p>Create multipart MIME-encoded message from FILEs</p>
+
+<pre><code>        -o FILE Output. Default: stdout
+        -a HDR  Add header(s). Examples:
+                &quot;From: user@host.org&quot;, &quot;Date: `date -R`&quot;
+        -c CT   Content type. Default: application/octet-stream
+        -C CS   Charset. Default: us-ascii</code></pre>
+
+<p>Other options are silently ignored</p>
 
 </dd>
 <dt id="man"><b>man</b></dt>
@@ -2530,6 +2697,17 @@ Output format:
 <pre><code>        -f FILE         Spec file (default Mimfile)</code></pre>
 
 </dd>
+<dt id="minips"><b>minips</b></dt>
+<dd>
+
+<p>minips [-o COL1,COL2=HEADER] [-T]</p>
+
+<p>Show list of processes</p>
+
+<pre><code>        -o COL1,COL2=HEADER     Select columns for display
+        -T                      Show threads</code></pre>
+
+</dd>
 <dt id="mkdir"><b>mkdir</b></dt>
 <dd>
 
@@ -2602,6 +2780,17 @@ Output format:
         -i INODES       Number of inodes for the filesystem
         -l FILE         Read bad blocks list from FILE
         -v              Make version 2 filesystem</code></pre>
+
+</dd>
+<dt id="mkfs.reiser"><b>mkfs.reiser</b></dt>
+<dd>
+
+<p>mkfs.reiser [-f] [-l LABEL] BLOCKDEV [4K-BLOCKS]</p>
+
+<p>Make a ReiserFS V3 filesystem</p>
+
+<pre><code>        -f      Force
+        -l LBL  Volume label</code></pre>
 
 </dd>
 <dt id="mkfs.vfat"><b>mkfs.vfat</b></dt>
@@ -2705,7 +2894,9 @@ TYPE:
 <p>Mount a filesystem. Filesystem autodetection requires /proc.</p>
 
 <pre><code>        -a              Mount all filesystems in fstab
-        -f              Dry run
+        -f              Update /etc/mtab, but don&#39;t mount
+        -i              Don&#39;t run mount helper
+        -n              Don&#39;t update /etc/mtab
         -v              Verbose
         -r              Read-only mount
         -t FSTYPE[,...] Filesystem type(s)
@@ -2839,6 +3030,25 @@ TYPE:
 <dd>
 
 <p>nc [OPTIONS] HOST PORT - connect nc [OPTIONS] -l -p PORT [HOST] [PORT] - listen</p>
+
+<pre><code>        -e PROG Run PROG after connect (must be last)
+        -l      Listen mode, for inbound connects
+        -lk     With -e, provides persistent server
+        -p PORT Local port
+        -s ADDR Local address
+        -w SEC  Timeout for connects and final net reads
+        -i SEC  Delay interval for lines sent
+        -n      Don&#39;t do DNS resolution
+        -u      UDP mode
+        -v      Verbose
+        -o FILE Hex dump traffic
+        -z      Zero-I/O mode (scanning)</code></pre>
+
+</dd>
+<dt id="netcat"><b>netcat</b></dt>
+<dd>
+
+<p>netcat [OPTIONS] HOST PORT - connect nc [OPTIONS] -l -p PORT [HOST] [PORT] - listen</p>
 
 <pre><code>        -e PROG Run PROG after connect (must be last)
         -l      Listen mode, for inbound connects
@@ -3168,6 +3378,23 @@ TYPE:
         -q      Quiet</code></pre>
 
 </dd>
+<dt id="popmaildir"><b>popmaildir</b></dt>
+<dd>
+
+<p>popmaildir [OPTIONS] MAILDIR [CONN_HELPER ARGS]</p>
+
+<p>Fetch content of remote mailbox to local maildir</p>
+
+<pre><code>        -s              Skip authorization
+        -T              Get messages with TOP instead of RETR
+        -k              Keep retrieved messages on the server
+        -t SEC          Network timeout
+        -F &#39;PROG ARGS&#39;  Filter program (may be repeated)
+        -M &#39;PROG ARGS&#39;  Delivery program</code></pre>
+
+<p>Fetch from plain POP3 server: popmaildir -k DIR nc pop3.server.com 110 &lt;user_and_pass.txt Fetch from SSLed POP3 server and delete fetched emails: popmaildir DIR -- openssl s_client -quiet -connect pop3.server.com:995 &lt;user_and_pass.txt</p>
+
+</dd>
 <dt id="poweroff"><b>poweroff</b></dt>
 <dd>
 
@@ -3340,6 +3567,20 @@ TYPE:
         -f      Force (don&#39;t go through init)</code></pre>
 
 </dd>
+<dt id="reformime"><b>reformime</b></dt>
+<dd>
+
+<p>reformime [OPTIONS]</p>
+
+<p>Parse MIME-encoded message on stdin</p>
+
+<pre><code>        -x PREFIX       Extract content of MIME sections to files
+        -X PROG ARGS    Filter content of MIME sections through PROG
+                        Must be the last option</code></pre>
+
+<p>Other options are silently ignored</p>
+
+</dd>
 <dt id="remove-shell"><b>remove-shell</b></dt>
 <dd>
 
@@ -3392,6 +3633,23 @@ TYPE:
 <p>rev [FILE]...</p>
 
 <p>Reverse lines of FILE</p>
+
+</dd>
+<dt id="rfkill"><b>rfkill</b></dt>
+<dd>
+
+<p>rfkill COMMAND [INDEX|TYPE]</p>
+
+<p>Enable/disable wireless devices</p>
+
+<p>Commands:</p>
+
+<pre><code>        list [INDEX|TYPE]       List current state
+        block INDEX|TYPE        Disable device
+        unblock INDEX|TYPE      Enable device
+
+        TYPE: all, wlan(wifi), bluetooth, uwb(ultrawideband),
+                wimax, wwan, gps, fm</code></pre>
 
 </dd>
 <dt id="rm"><b>rm</b></dt>
@@ -3578,6 +3836,39 @@ TYPE:
         -r,-E   Use extended regex syntax</code></pre>
 
 <p>If no -e or -f, the first non-option argument is the sed command string. Remaining arguments are input files (stdin if none).</p>
+
+</dd>
+<dt id="sendmail"><b>sendmail</b></dt>
+<dd>
+
+<p>sendmail [-tv] [-f SENDER] [-amLOGIN 4&lt;user_pass.txt | -auUSER -apPASS] [-w SECS] [-H &#39;PROG ARGS&#39; | -S HOST] [RECIPIENT_EMAIL]...</p>
+
+<p>Read email from stdin and send it</p>
+
+<p>Standard options:</p>
+
+<pre><code>        -t              Read additional recipients from message body
+        -f SENDER       For use in MAIL FROM:&lt;sender&gt;. Can be empty string
+                        Default: -auUSER, or username of current UID
+        -o OPTIONS      Various options. -oi implied, others are ignored
+        -i              -oi synonym, implied and ignored</code></pre>
+
+<p>Busybox specific options:</p>
+
+<pre><code>        -v              Verbose
+        -w SECS         Network timeout
+        -H &#39;PROG ARGS&#39;  Run connection helper. Examples:
+                openssl s_client -quiet -tls1 -starttls smtp -connect smtp.gmail.com:25
+                openssl s_client -quiet -tls1 -connect smtp.gmail.com:465
+                        $SMTP_ANTISPAM_DELAY: seconds to wait after helper connect
+        -S HOST[:PORT]  Server (default $SMTPHOST or 127.0.0.1)
+        -amLOGIN        Log in using AUTH LOGIN
+        -amPLAIN        or AUTH PLAIN
+                        (-amCRAM-MD5 not supported)
+        -auUSER         Username for AUTH
+        -apPASS         Password for AUTH</code></pre>
+
+<p>If no -a options are given, authentication is not done. If -amLOGIN is given but no -au/-ap, user/password is read from fd #4. Other options are silently ignored; -oi is implied. Use makemime to create emails with attachments.</p>
 
 </dd>
 <dt id="seq"><b>seq</b></dt>
@@ -4205,7 +4496,7 @@ Other:
 <dt id="tar"><b>tar</b></dt>
 <dd>
 
-<p>tar c|x|t [-zJjahmvokO] [-f TARFILE] [-C DIR] [-T FILE] [-X FILE] [--exclude PATTERN]... [FILE]...</p>
+<p>tar c|x|t [-ZzJjahmvokO] [-f TARFILE] [-C DIR] [-T FILE] [-X FILE] [--exclude PATTERN]... [FILE]...</p>
 
 <p>Create, extract, or list files from a tar file</p>
 
@@ -4219,6 +4510,7 @@ Other:
         -m      Don&#39;t restore mtime
         -o      Don&#39;t restore user:group
         -k      Don&#39;t replace existing files
+        -Z      (De)compress using compress
         -z      (De)compress using gzip
         -J      (De)compress using xz
         -j      (De)compress using bzip2
@@ -4509,6 +4801,14 @@ Options:
         -b              Brief output</code></pre>
 
 </dd>
+<dt id="tune2fs"><b>tune2fs</b></dt>
+<dd>
+
+<p>tune2fs [-c MAX_MOUNT_COUNT] [-i DAYS] [-C MOUNT_COUNT] [-L LABEL] BLOCKDEV</p>
+
+<p>Adjust filesystem options on ext[23] filesystems</p>
+
+</dd>
 <dt id="ubiattach"><b>ubiattach</b></dt>
 <dd>
 
@@ -4591,9 +4891,10 @@ Options:
 <dt id="udhcpc"><b>udhcpc</b></dt>
 <dd>
 
-<p>udhcpc [-fbqvRB] [-a[MSEC]] [-t N] [-T SEC] [-A SEC/-n] [-i IFACE] [-s PROG] [-p PIDFILE] [-oC] [-r IP] [-V VENDOR] [-F NAME] [-x OPT:VAL]... [-O OPT]...</p>
+<p>udhcpc [-fbqvRB] [-a[MSEC]] [-t N] [-T SEC] [-A SEC/-n] [-i IFACE] [-P PORT] [-s PROG] [-p PIDFILE] [-oC] [-r IP] [-V VENDOR] [-F NAME] [-x OPT:VAL]... [-O OPT]...</p>
 
 <pre><code>        -i IFACE        Interface to use (default eth0)
+        -P PORT         Use PORT (default 68)
         -s PROG         Run PROG at DHCP events (default /usr/share/udhcpc/default.script)
         -p FILE         Create pidfile
         -B              Request broadcast replies
@@ -4629,7 +4930,7 @@ Signals:
 <dt id="udhcpc6"><b>udhcpc6</b></dt>
 <dd>
 
-<p>udhcpc6 [-fbnqvodR] [-i IFACE] [-r IPv6] [-s PROG] [-p PIDFILE] [-x OPT:VAL]... [-O OPT]...</p>
+<p>udhcpc6 [-fbnqvodR] [-i IFACE] [-r IPv6] [-s PROG] [-p PIDFILE] [-x OPT:VAL]... [-O OPT]... [-P N]</p>
 
 <pre><code>        -i IFACE        Interface to use (default eth0)
         -p FILE         Create pidfile
@@ -4644,6 +4945,7 @@ Signals:
         -q              Exit after obtaining lease
         -R              Release IP on exit
         -S              Log to syslog too
+        -P N            Use port N (default 546)
         -O OPT          Request option OPT from server (cumulative)
         -o              Don&#39;t request any options (unless -O is given)
         -r IPv6         Request this address (&#39;no&#39; to not request any IP)
@@ -4666,7 +4968,7 @@ Signals:
 <dt id="udhcpd"><b>udhcpd</b></dt>
 <dd>
 
-<p>udhcpd [-fS] [-I ADDR] [CONFFILE]</p>
+<p>udhcpd [-fS] [-I ADDR] [-P N] [CONFFILE]</p>
 
 <p>DHCP server</p>
 
@@ -4674,6 +4976,7 @@ Signals:
         -S      Log to syslog too
         -I ADDR Local address
         -a MSEC Timeout for ARP ping (default 2000)
+        -P N    Use port N (default 67)
 Signals:
 
         USR1    Update lease file</code></pre>
@@ -4713,7 +5016,8 @@ Signals:
 
 <p>Unmount file systems</p>
 
-<pre><code>        -a      Unmount all file systems
+<pre><code>        -a      Unmount all file systems in /etc/mtab
+        -n      Don&#39;t erase /etc/mtab entries
         -r      Try to remount devices as read-only if mount is busy
         -l      Lazy umount (detach filesystem)
         -f      Force umount (i.e., unreachable NFS server)
@@ -4737,6 +5041,17 @@ Signals:
         -v      Kernel version
         -i      The hardware platform
         -o      OS name</code></pre>
+
+</dd>
+<dt id="uncompress"><b>uncompress</b></dt>
+<dd>
+
+<p>uncompress [-cf] [FILE]...</p>
+
+<p>Decompress .Z file[s]</p>
+
+<pre><code>        -c      Write to stdout
+        -f      Overwrite</code></pre>
 
 </dd>
 <dt id="unexpand"><b>unexpand</b></dt>
@@ -4796,6 +5111,18 @@ Signals:
 <pre><code>        -c      Write to stdout
         -f      Force
         -k      Keep input files</code></pre>
+
+</dd>
+<dt id="unlzop"><b>unlzop</b></dt>
+<dd>
+
+<p>unlzop [-cfUvF] [FILE]...</p>
+
+<pre><code>        -c      Write to stdout
+        -f      Force
+        -U      Delete input files
+        -v      Verbose
+        -F      Don&#39;t verify checksum</code></pre>
 
 </dd>
 <dt id="unshare"><b>unshare</b></dt>
