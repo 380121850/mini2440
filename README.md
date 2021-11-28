@@ -17,7 +17,7 @@ busybox升级到最新版本。
 3、ubi文件系统的支持；除了BSP（UBOOT和OS分区），剩余空间划分为应用程序APP分区；
    后续各种应用、驱动可以直接在上面更新；就不用折腾UBOOT和OS了
    
-分区划分：
+分区划分：  
 dev:    size   erasesize  name  
 mtd0: 00080000 00020000 "uboot"  
 mtd1: 00020000 00020000 "env"  
