@@ -18,11 +18,11 @@ busybox升级到最新版本。
    后续各种应用、驱动可以直接在上面更新；就不用折腾UBOOT和OS了
    
 分区划分：
-dev:    size   erasesize  name
-mtd0: 00080000 00020000 "uboot"
-mtd1: 00020000 00020000 "env"
-mtd2: 00700000 00020000 "os"
-mtd3: 0f860000 00020000 "app"
+dev:    size   erasesize  name  
+mtd0: 00080000 00020000 "uboot"  
+mtd1: 00020000 00020000 "env"  
+mtd2: 00700000 00020000 "os"  
+mtd3: 0f860000 00020000 "app"  
 
 ### 2021.06.16
 1、增加QT，但是基于UBUNTU18，没有编译通过
